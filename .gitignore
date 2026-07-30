@@ -1,0 +1,38 @@
+﻿# Virtual environments
+.venv/
+venv/
+forensic_env/
+forensic-image-transformation/venv/
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# Model weights & caches
+model_cache/
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+
+# Generated runtime outputs
+outputs/*
+!outputs/.gitkeep
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+
+# Office temp
+~$*
+presentation/~$*
