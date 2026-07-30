@@ -1,0 +1,129 @@
+SLIDE_WIDTH 12192000
+SLIDE_HEIGHT 6858000
+SLIDE_COUNT 10
+LAYOUT_COUNT 11
+LAYOUT 0: Title Slide
+  ph idx=0 type=CENTER_TITLE (3) name=Title 1
+  ph idx=1 type=SUBTITLE (4) name=Subtitle 2
+  ph idx=10 type=DATE (16) name=Date Placeholder 3
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 4
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 5
+LAYOUT 1: Title and Content
+  ph idx=0 type=TITLE (1) name=Title 1
+  ph idx=1 type=OBJECT (7) name=Content Placeholder 2
+  ph idx=10 type=DATE (16) name=Date Placeholder 3
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 4
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 5
+LAYOUT 2: Section Header
+  ph idx=0 type=TITLE (1) name=Title 1
+  ph idx=1 type=BODY (2) name=Text Placeholder 2
+  ph idx=10 type=DATE (16) name=Date Placeholder 3
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 4
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 5
+LAYOUT 3: Two Content
+  ph idx=0 type=TITLE (1) name=Title 1
+  ph idx=1 type=OBJECT (7) name=Content Placeholder 2
+  ph idx=2 type=OBJECT (7) name=Content Placeholder 3
+  ph idx=10 type=DATE (16) name=Date Placeholder 4
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 5
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 6
+LAYOUT 4: Comparison
+  ph idx=0 type=TITLE (1) name=Title 1
+  ph idx=1 type=BODY (2) name=Text Placeholder 2
+  ph idx=2 type=OBJECT (7) name=Content Placeholder 3
+  ph idx=3 type=BODY (2) name=Text Placeholder 4
+  ph idx=4 type=OBJECT (7) name=Content Placeholder 5
+  ph idx=10 type=DATE (16) name=Date Placeholder 6
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 7
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 8
+LAYOUT 5: Title Only
+  ph idx=0 type=TITLE (1) name=Title 1
+  ph idx=10 type=DATE (16) name=Date Placeholder 2
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 3
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 4
+LAYOUT 6: Blank
+  ph idx=10 type=DATE (16) name=Date Placeholder 1
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 2
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 3
+LAYOUT 7: Content with Caption
+  ph idx=0 type=TITLE (1) name=Title 1
+  ph idx=1 type=OBJECT (7) name=Content Placeholder 2
+  ph idx=2 type=BODY (2) name=Text Placeholder 3
+  ph idx=10 type=DATE (16) name=Date Placeholder 4
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 5
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 6
+LAYOUT 8: Picture with Caption
+  ph idx=0 type=TITLE (1) name=Title 1
+  ph idx=1 type=PICTURE (18) name=Picture Placeholder 2
+  ph idx=2 type=BODY (2) name=Text Placeholder 3
+  ph idx=10 type=DATE (16) name=Date Placeholder 4
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 5
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 6
+LAYOUT 9: Title and Vertical Text
+  ph idx=0 type=TITLE (1) name=Title 1
+  ph idx=1 type=BODY (2) name=Vertical Text Placeholder 2
+  ph idx=10 type=DATE (16) name=Date Placeholder 3
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 4
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 5
+LAYOUT 10: Vertical Title and Text
+  ph idx=0 type=TITLE (1) name=Vertical Title 1
+  ph idx=1 type=BODY (2) name=Vertical Text Placeholder 2
+  ph idx=10 type=DATE (16) name=Date Placeholder 3
+  ph idx=11 type=FOOTER (15) name=Footer Placeholder 4
+  ph idx=12 type=SLIDE_NUMBER (13) name=Slide Number Placeholder 5
+--- SLIDE 1 ---
+  shape: name=Subtitle 2 type=PLACEHOLDER (14) left=2136448 top=4546362 w=8531551 h=711437
+    para='Name of the Students' font=[('Name of the ', None, 'None', None, None), ('Students', None, 'None', None, None)]
+    para='Registration No.' font=[('Registration No.', None, 'None', None, None)]
+  shape: name=Rectangle 4 type=AUTO_SHAPE (1) left=167676 top=28573 w=11793415 h=2384425
+  shape: name=Rectangle 3 type=AUTO_SHAPE (1) left=234950 top=712788 w=11790363 h=892552
+    para='On' font=[('On', 'Times New Roman', '304800', None, True)]
+    para='Title' font=[('Title', 'Times New Roman', '355600', None, True)]
+  shape: name=TextBox 8 type=TEXT_BOX (17) left=1419225 top=4763 w=9353550 h=708025
+    para='Major Project Presentation' font=[('Major Project Presentation', 'Times New Roman', '508000', None, True)]
+  shape: name=Picture 1 type=PICTURE (13) left=4777076 top=2563342 w=1841500 h=1674813
+--- SLIDE 2 ---
+  shape: name=Title 1 type=PLACEHOLDER (14) left=838200 top=365125 w=10515600 h=1325563
+    para='Outlines' font=[('Outlines', None, 'None', None, None)]
+  shape: name=Content Placeholder 2 type=PLACEHOLDER (14) left=838200 top=1825625 w=10515600 h=4351338
+--- SLIDE 3 ---
+  shape: name=Title 1 type=PLACEHOLDER (14) left=838200 top=365126 w=10515600 h=762920
+    para='Introduction' font=[('Introduction', None, 'None', None, None)]
+  shape: name=Content Placeholder 2 type=PLACEHOLDER (14) left=838200 top=1367327 w=10515600 h=4809636
+    para='Brief mention about the topic including introduction, motivation, advantage, application ..etc (make points instead of long paragraphs)' font=[('Brief mention about the topic including introduction, motivation, advantage, app', None, 'None', None, None), ('etc', None, 'None', None, None), (' (make points instead of long paragraphs)', None, 'None', None, None)]
+--- SLIDE 4 ---
+  shape: name=Title 1 type=PLACEHOLDER (14) left=438150 top=727075 w=10772775 h=727075
+    para='Literature Study' font=[('Literature Study', 'Times New Roman', '406400', None, True)]
+  shape: name=Table 4 type=TABLE (19) left=442913 top=1676400 w=11304587 h=5105405
+  shape: name=Slide Number Placeholder 2 type=PLACEHOLDER (14) left=11256963 top=6448425 w=477837 h=415925
+    para='8' font=[('8', 'Times New Roman', '254000', None, True)]
+--- SLIDE 5 ---
+  shape: name=Title 1 type=PLACEHOLDER (14) left=838200 top=365125 w=10515600 h=720191
+    para='Technical Details' font=[('Technical Details', None, 'None', None, None)]
+  shape: name=Content Placeholder 2 type=PLACEHOLDER (14) left=838200 top=1230594 w=10515600 h=4946369
+    para='Write the technical details of the technique studied ' font=[('Write the technical details of the technique studied ', None, 'None', None, None)]
+--- SLIDE 6 ---
+  shape: name=Title 1 type=TEXT_BOX (17) left=838200 top=365125 w=10515600 h=720191
+    para='Technical Details' font=[('Technical Details', None, 'None', None, None)]
+  shape: name=Content Placeholder 2 type=TEXT_BOX (17) left=838200 top=1230594 w=10515600 h=4946369
+    para='Write the technical details of the technique studied ' font=[('Write the technical details of the technique studied ', None, 'None', None, None)]
+--- SLIDE 7 ---
+  shape: name=Title 1 type=PLACEHOLDER (14) left=838200 top=365125 w=10515600 h=720191
+    para='Technical Details' font=[('Technical Details', None, 'None', None, None)]
+  shape: name=Content Placeholder 2 type=PLACEHOLDER (14) left=838200 top=1230594 w=10515600 h=4946369
+    para='Write the technical details of the technique studied ' font=[('Write the technical details of the technique studied ', None, 'None', None, None)]
+--- SLIDE 8 ---
+  shape: name=Title 1 type=PLACEHOLDER (14) left=838200 top=365125 w=10515600 h=720191
+    para='Results and Discussion' font=[('Results and Discussion', None, 'None', None, None)]
+  shape: name=Content Placeholder 2 type=PLACEHOLDER (14) left=838200 top=1230594 w=10515600 h=4946369
+    para='Give the details of results and the corresponding analysis (Tables, Graphs, Other forms of results if any)' font=[('Give the details of results and the corresponding analysis (Tables, Graphs, Othe', None, 'None', None, None)]
+    para='If needed students are advised to extend the results to more than one (or required number of) slide. ' font=[('If needed students are advised to extend the results to more than one (or requir', None, 'None', None, None)]
+--- SLIDE 9 ---
+  shape: name=Title 1 type=PLACEHOLDER (14) left=838200 top=365125 w=10515600 h=720191
+    para='Conclusion' font=[('Conclusion', None, 'None', None, None)]
+  shape: name=Content Placeholder 2 type=PLACEHOLDER (14) left=838200 top=1230594 w=10515600 h=4946369
+--- SLIDE 10 ---
+  shape: name=Title 1 type=PLACEHOLDER (14) left=838200 top=365125 w=10515600 h=720191
+    para='References' font=[('References', None, 'None', None, None)]
+  shape: name=Content Placeholder 2 type=PLACEHOLDER (14) left=838200 top=1230594 w=10515600 h=4946369
+    para='Add the references referred while studding the STAR topic.' font=[('Add the references referred while studding the STAR topic.', None, 'None', None, None)]

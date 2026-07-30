@@ -1,0 +1,41 @@
+slides=20 size_mb=0.76
+01: Major Project Presentation
+    + On
+02: Problem Statement
+    + Traditional composite creation
+03: Motivation
+    + 1
+04: Existing Methods
+    + STAAR Assessment  |  Forensic Sketch Generator  |  C.V. Raman Global University
+05: Literature Survey
+    + STAAR Assessment  |  Forensic Sketch Generator  |  C.V. Raman Global University
+06: Research Gap
+    + Contribution: unify artist-style interviewing, controllable face construction, forensic sketch rende
+07: Proposed Solution
+    + Digitize composite practice: interview → structure features → compose face → render sketch → refine
+08: End-to-End Workflow Diagram
+    + 1.  Session start with witness
+09: System Architecture Diagram
+    + STAAR Assessment  |  Forensic Sketch Generator  |  C.V. Raman Global University
+10: Technology Stack
+    + PyTorch · Diffusers · CV
+11: AI Pipeline
+    + •  MVP path: Witness attributes → JSON profile → prompt builder → Stable Diffusion face → OpenCV pen
+12: Datasets
+    + Fairness note: public face corpora may under-represent demographics and rare marks (scars, tattoos) 
+13: Current Progress (≈ 50% MVP)
+    + ✓
+14: Future Work
+    + 1
+15: Expected Impact
+    + Minutes, not hours
+16: Demo / Prototype
+    + Live MVP Highlights
+17: Timeline
+    + Phase 1
+18: Conclusion
+    + •  Forensic composites remain vital when CCTV / biometrics are unavailable. •  We redesign Gen-AI sk
+19: References
+    + •  [1] Soppari et al. (2026). Forensic sketch generation using Gen-AI. WJARR. •  [2] Nasir et al. (2
+20: Thank You
+    + Questions & Discussion

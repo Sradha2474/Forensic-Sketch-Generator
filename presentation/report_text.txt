@@ -1,0 +1,469 @@
+PAGES: 13
+
+===== PAGE 1 =====
+
+1  
+Forensic Sketch Generator: An AI-Powered Approach 
+Using Natural Language Processing and Conditional GAN 
+ 
+ 
+ 
+ 
+ 
+Report 
+Science and Technology advancement- Assessment Review (STAAR) 
+ 
+ 
+Submitted by: 
+       1. Tusharkanta Behera         Regd. No.: 2301020601 
+                                      2. Sradha Ram                     Regd. No.: 2301020808 
+         3. Sandeep Kumar Swain    Regd. No.: 2301020438 
+                               
+ 
+ 
+Under the supervision of 
+Dr. Sukant Kishoro Bisoy 
+ 
+ 
+ 
+Department of Computer Science and Engineering 
+C.V. Raman Global University, Bhubaneswar 
+Odisha, 752054, India 
+
+===== PAGE 2 =====
+
+2  
+ACKNOWLEDGEMENT 
+ 
+I would like to express my sincere gratitude to my project guide to Dr. Sukant Kishoro Bisoy, 
+Department of Computer Science and Engineering, for their constant support, valuable 
+guidance, and encouragement throughout the completion of my STAAR project. 
+ 
+Their deep knowledge and expertise in deep learning, computer vision, and natural language 
+processing have greatly contributed to the successful development of this project. I am 
+especially thankful for their continuous guidance, constructive suggestions, and timely 
+feedback, which helped me understand the concepts clearly and improve my work at every 
+stage. 
+ 
+I would also like to express my appreciation for their patience and willingness to help whenever 
+I faced difficulties during the project. Their motivation and support inspired me to explore the 
+subject in greater depth and complete the project with confidence. 
+ 
+I am also grateful to the Department of Computer Science and Engineering for providing me 
+with the necessary resources and environment to carry out this work successfully. 
+ 
+Finally, I would like to thank everyone who directly or indirectly contributed to the completion 
+of this project. 
+ 
+Thanking You 
+
+===== PAGE 3 =====
+
+3  
+ABSTRACT 
+ 
+This project presents an efficient and automated approach for generating forensic face sketches 
+from natural language witness descriptions using Natural Language Processing (NLP) and 
+Conditional Generative Adversarial Networks (cGAN) . Forensic sketch generation is a 
+critical step in criminal investigations, yet it traditionally relies on skilled sketch artists who 
+are scarce, expensive, and introduce subjective biases. The proposed system addresses these 
+challenges by bridging the gap between verbal witness accounts and visual forensic evidence. 
+ 
+The proposed method operates as a multi -stage pipeline. Witness descriptions are first parsed 
+using an NLP module built on spaCy and HuggingFace Transformers, extracting thirteen 
+structured facial attribute categories including face shape, eye colour, hair length, and 
+distinctive marks. These attributes are encoded into a 512 -dimensional conditioning vector 
+driving a Conditional GAN based on the StyleGAN2 architecture to synthesise a photorealistic 
+face image. A sketch style transfer module then converts the photorealistic output into a 
+forensic pencil-sketch using edge detection and dodge blending techniques. 
+ 
+The work is grounded in the foundational base paper: Forensic Face Photo-Sketch Recognition 
+using a Deep Learning-based Architecture (Galea & Farrugia, IEEE Signal Processing Letters, 
+2017) [1], which demonstrated that transfer learning on VGG -Face combined with 3D 
+morphable model data augmentation can bridge the modality gap between sketches and 
+photographs, achieving 94.61% Rank -1 accuracy when fused with LGMS. The proposed 
+system extends this vision by generating sketches from text, creating a fully automated forensic 
+identification pipeline. Performance evaluation demonstrates a FID score of approximately 
+42.3, facial attribute accuracy of 78%, and identity preservation of 71% at Rank-10. 
+
+===== PAGE 4 =====
+
+4
+1. Problem Specification
+ Forensic composite creation begins with a cognitive interview: a witness recalls a suspect’s
+face, selects features from facial catalogs, and guides an artist through iterative revisions of
+proportions, characteristics, and shading—often over several hours. This process depends on scarce
+trained composite artists, is slowed by lengthy sessions, and is limited by communication gaps
+between verbal memory and drawn form. Existing software composites still require manual feature
+picking and an expert operator. We propose an AI-assisted pipeline that mirrors this
+workflow—conducting an artist-style structured interview, constructing a controllable facial
+representation, rendering a forensic-style sketch, and refining via witness feedback—producing
+usable composites in minutes.
+2. Introduction
+ A facial composite (commonly called a forensic or police sketch) is a graphical reconstruction
+of a witness’s memory of a suspect’s face. When surveillance footage or biometric evidence is
+unavailable, composites remain a primary investigative aid: they support public alerts, help check
+leads, and assist identification in the critical early hours of a case.
+ In current practice, construction does not begin with free artistic drawing. It begins with a
+Cognitive Interview (CI)—and often a Holistic Cognitive Interview (H-CI)—recommended by
+forensic art guidelines and widely used by police. The witness is guided to reinstate the context of
+the crime in the “mind’s eye,” give uninterrupted free recall of the face, and then answer
+feature-focused prompts (eyes, nose, mouth, hair, scars, and so on). Reference catalogs such as the
+FBI Facial Identification Catalog or Steinberg-style feature libraries help the witness point to
+shapes when words alone fail. Only then does construction begin—by hand sketch (proportions,
+characteristics, shading) or by software composites such as Identikit, E-FIT, PRO-fit, FACES, and
+EvoFIT—always under continuous witness feedback.
+ Our research starts from this real forensic workflow, not from generic text-to-image generation.
+Certified composite artists are scarce, sessions last hours, and both hand and software methods still
+lose detail when verbal memory must be translated into a fixed feature library. We therefore
+propose an AI-Assisted Forensic Sketch Generator that mirrors the
+interview–catalog–construct–refine loop used by practitioners, while reducing turnaround from
+hours to minutes.
+ The proposed system is realized as an investigator-facing Next.js application in which an
+interactive interview agent asks questions in forensic-artist order, maintains a living face-feature
+profile, synthesizes a controllable face, renders a forensic pencil-style composite, and continues a
+guided refinement dialogue until the witness approves the likeness. Optional research validation
+metrics support experimental assessment. The intended product is an investigator-assistive tool: it
+does not replace legal judgment or the witness, but digitizes the forensic artist’s construction steps
+so usable suspect sketches can be produced quickly, iteratively, and in a manner aligned with
+established composite practice.
+
+
+===== PAGE 5 =====
+
+5
+3. Literature Survey
+ The present survey is organized around related forensic and text-to-face research papers.
+Foundational algorithm papers (StyleGAN2, ArcFace, FaceNet, Attention) are treated as supporting
+building blocks; the design baseline is the direct Gen-AI forensic sketch literature and related
+application studies.
+3.1 Base Paper — Forensic Sketch Generation using Gen-AI
+ Soppari et al. (2026) propose an end-to-end forensic pipeline: eyewitness text is cleaned and
+turned into a prompt; Stable Diffusion XL generates a forensic-style face; InsightFace and BiSeNet
+extract biometric and semantic features; FAISS performs hybrid mugshot retrieval. This
+demonstrates that text-to-sketch generation can be linked directly to suspect ranking, reducing artist
+dependency. Its stated future work—iterative sketch refinement, stronger multimodal fusion, and
+richer marks such as scars—defines the research space our project extends. We treat this paper as
+the primary base design reference: same forensic goal (description → sketch → identity support),
+with an interview-aligned modular architecture and explicit witness-refinement loop as our
+differentiation.
+3.2 Text-to-Face Generation
+ Text2FaceGAN (Nasir et al.) generates faces from CelebA-derived captions using DCGAN, but
+only at low resolution (64×64) and with limited identity detail. Chen et al. (FTGAN) jointly train a
+text encoder and image decoder for fine-grained text-to-face synthesis and introduce
+SCU-Text2face, reporting about 59% average similarity to ground truth. Khan et al. (IEEE Access)
+advocate fully trained GANs over frozen text encoders so word-level facial cues are not lost.
+TediGAN (Xia et al.) maps text into a pre-trained StyleGAN latent space for high-resolution
+(1024×1024) controllable faces, yet still inherits GAN instability and imperfect identity control.
+ST²FG (Oza et al.) uses BERT encoding and iterative user refinement—closest psychologically to a
+forensic interview—via an Affine Combination Module, but remains GAN-bound. Together these
+works motivate structured language understanding, attribute-to-latent mapping, and high-fidelity
+controllable face synthesis.
+3.3 Sketch–Photo Forensic Transformation
+ A large body of law-enforcement research assumes a sketch already exists and focuses on
+sketch-to-photo conversion for mugshot matching. Bushra and Maheswari review DCGAN-based
+forensic sketch-to-face transformation. Devakumar and Sarath convert pencil sketches to real
+images with DCGAN and report improved SSIM. Kazemi et al. propose attribute-conditioned
+CycleGAN for unpaired sketch-to-photo synthesis. Li et al. address few-shot sketch styles via
+global–local asymmetric translation (GLAS). Yu et al. improve face sketch recognition through
+adversarial sketch–photo transformation. CLIP4Sketch (Jain et al.) strengthens sketch–mugshot
+matching with diffusion-synthesized training data. These studies confirm identity-preserving
+cross-domain translation is essential—but they largely start after an artist or operator has already
+produced the sketch.
+
+
+===== PAGE 6 =====
+
+6
+3.4 Synthesis for Our Design
+ Prior related work therefore splits into (i) text-to-face generators without a full forensic
+interview and sketch refinement loop, and (ii) sketch-to-photo / recognition systems that still need a
+hand-made composite. The base Gen-AI paper closes part of that loop with diffusion and FAISS
+matching, yet leaves iterative witness refinement and modular attribute editing as open
+enhancements. Our research adopts that forensic objective and redesigns the pipeline as artist-style
+interview → feature profile → controllable face composition → forensic sketch rendering →
+guided refinement, with optional biometric validation for research assessment.
+4. Research Gap
+4.1 Limitations of Current Research
+ From the surveyed papers, two strong but incomplete lines of work dominate. First, text-to-face
+generators can turn descriptions into faces, but usually stop at a photorealistic image, rarely produce
+a forensic pencil-style composite, and are typically one-shot systems without a structured witness
+interview loop. Second, sketch-to-photo and recognition systems improve matching once a sketch
+exists, yet still assume a forensic artist or operator has already drawn or assembled the composite.
+The base paper closes part of this loop by linking text → diffusion sketch → biometric/semantic
+mugshot matching. Even so, it remains largely a prompt → generate → search pipeline. Its own
+future-work section highlights missing pieces: iterative refinement without identity drift, richer
+marks (scars, tattoos), stronger multimodal fusion, and explainable scoring.
+4.2 Gap Analysis Relative to Project Goals
+Gap
+Current State
+Our Goal / Vision
+Starting point
+Many systems need a hand-drawn or
+software composite first
+Begin from an AI-led forensic interview; no
+artist required for first draft
+Workflow realism
+One-shot generation or prompt rewriting
+Mirror practice: interview → structure features
+→ construct → refine
+Feature control
+Opaque prompt or whole-image
+regeneration
+Living feature profile editable one trait at a time
+Output form
+Photo-like faces, or sketch-to-photo only
+Explicit forensic pencil-style sketch output
+Product interface
+Notebooks / ad-hoc demos
+Investigator-facing Next.js application
+Assistive role
+Often framed as full artist replacement
+Assist investigators; witness remains authority
+4.3 Contribution Statement
+ Research gap: existing systems either generate faces from text or match sketches to photos; few
+unify artist-style interviewing, controllable face construction, forensic sketch rendering, iterative
+witness refinement, and research-time biometric evaluation in one investigator-aligned pipeline.
+
+
+===== PAGE 7 =====
+
+7
+ Our contribution: bridge that gap with a modular AI-assisted forensic sketch generator designed
+around real composite practice—assist investigators, shorten hours to minutes, and keep the
+witness-in-the-loop as the source of truth.
+5. Proposed Solution with Block Diagram
+5.1 Overview of the Proposed Framework
+ This work proposes an AI-assisted forensic sketch generation framework that digitizes the
+operational workflow of composite construction. In conventional practice, a trained forensic artist
+conducts a Cognitive Interview, elicits feature-level descriptions, constructs a likeness, and revises
+the composite under continuous witness guidance. The proposed system replicates this procedure
+computationally: an interactive interview agent elicits facial information in a structured sequence,
+maintains a feature profile, synthesizes a controllable facial representation, renders a forensic-style
+sketch, and supports iterative refinement until witness approval.
+ In contrast to end-to-end prompt-to-image approaches, including the base Gen-AI forensic
+pipeline that maps textual prompts directly to diffusion-generated sketches and mugshot retrieval,
+the present design prioritizes interview alignment, attribute-level controllability, explicit sketch
+rendering, and witness-in-the-loop revision. The framework is intended as an assistive investigative
+tool; it does not replace the witness as the source of recalled information, nor does it constitute a
+legal determination of identity.
+5.2 System Architecture
+The architecture comprises five operational modules and an optional research validation layer, as
+illustrated in Figure 1.
+
+
+===== PAGE 8 =====
+
+8
+ Figure 1. Block diagram of the proposed AI-assisted forensic sketch generation framework.
+5.3 Correspondence to Forensic Practice
+Conventional Forensic Procedure
+Proposed System Component
+Cognitive Interview and feature prompting
+Module A — Interactive Forensic Interview Agent
+Catalog-based feature selection and note-taking
+Module B — Face Feature Profile Builder
+Construction of facial likeness
+Module C — Controllable Face Composer
+Pencil rendering / composite styling
+Module D — Forensic Sketch Renderer
+Continuous revision with the witness
+Module E — Guided Refinement Interview
+Research-time identity / quality assessment
+Optional Validation Layer
+
+
+===== PAGE 9 =====
+
+9
+5.4 Interactive Interview Protocol
+ Module A implements an interview state machine inspired by Cognitive Interview (CI) and
+Holistic Cognitive Interview (H-CI) procedures used in composite construction. The agent
+progresses through the following phases:
+• Context reinstatement: the witness is prompted to mentally reinstate the viewing conditions of
+the incident.
+• Free recall: an uninterrupted description of the face is elicited and recorded.
+• Global descriptors: coarse attributes are collected (approximate age, sex, build where
+available).
+• External features: hair characteristics and overall face shape are queried.
+• Internal features: eyes, eyebrows, nose, mouth, and ears are queried in turn.
+• Distinctive marks: scars, moles, tattoos, facial hair, eyewear, and related identifiers are elicited
+with spatial localization.
+• Holistic verification (optional): global impressions of the emerging likeness are assessed.
+• Visual catalog assistance: where verbalization is insufficient, reference exemplars are presented
+for selection.
+ The interview does not fabricate unstated attributes. Incomplete responses are retained as
+unknown and excluded from forced inference. The accumulated responses constitute the input to
+Module B.
+5.5 Module Specifications
+Module A — Interactive Forensic Interview Agent. Manages dialogue state, question sequencing,
+and adaptive follow-up under a protocol-constrained language model and deterministic phase
+controller. Input: witness responses within an active session. Output: ordered interview turns and
+extracted descriptors for profile update.
+Module B — Face Feature Profile Builder. Maintains a structured facial attribute profile
+(demographics, face geometry, hair, periocular features, nose, mouth, ears, distinctive marks, and
+accessories). The profile is updated incrementally across interview turns and serves as the sole
+conditioning interface to the generative stages.
+Module C — Controllable Face Composer. Projects the feature profile into a generative latent
+representation and synthesizes a photorealistic facial image. Controllability is required so that
+refinement may edit selected attributes without regenerating an unrelated identity. Model direction:
+attribute-conditioned StyleGAN2-ADA (or an equivalent controllable generator).
+Module D — Forensic Sketch Renderer. Transforms the synthesized face into a monochrome,
+pencil-style forensic composite suitable for investigative use, using classical edge-based rendering
+and/or image-to-image translation (Pix2Pix / CycleGAN) trained on photo–sketch corpora such as
+CUFS/CUFSF.
+Module E — Guided Refinement Interview. Following presentation of the sketch, the agent
+conducts a targeted revision dialogue analogous to mid-session artist adjustments (for example,
+
+
+===== PAGE 10 =====
+
+10
+ocular spacing, jaw width, or scar position). Only affected profile fields are updated; Modules C–D
+are then re-executed.
+Optional Validation Layer. For experimental evaluation, biometric and quality metrics may be
+computed (for example, ArcFace or FaceNet cosine similarity, FID, attribute consistency). This
+layer supports research reporting and is not required for operational sketch sessions.
+5.6 Operational Workflow
+• Step 1. An investigative session is initiated with the witness.
+• Step 2. Module A executes the interview protocol; Module B constructs the feature profile.
+• Step 3. Module C synthesizes a facial image; Module D renders the forensic sketch.
+• Step 4. Module E conducts refinement until witness approval is obtained.
+• Step 5. The approved sketch is exported as the session output.
+• Step 6. Where ground-truth references exist, the validation layer may quantify identity
+preservation and generation quality.
+5.7 Datasets
+Dataset
+Purpose
+CelebA
+Attribute vocabulary and conditional supervision
+FFHQ
+High-fidelity face generation prior
+CUFS / CUFSF
+Photo–sketch translation and sketch-domain evaluation
+5.8 Technology Stack
+Layer
+Technology
+Client application
+Next.js (App Router), TypeScript, React
+Application programming interface
+Next.js Route Handlers and/or FastAPI inference service
+Machine learning runtime
+Python 3.10+, PyTorch 2.0+
+Interview and language processing
+Transformer / LLM dialogue models with protocol constraints
+Computer vision
+OpenCV, PIL; StyleGAN2-ADA; sketch translation networks
+Experimental validation
+ArcFace / FaceNet embedding comparison
+Deployment
+Docker; GPU-enabled inference worker as required
+5.9 Anticipated Outcome
+ The proposed framework is expected to yield an investigator-facing Next.js application capable
+of conducting a structured forensic interview, constructing and refining forensic-style composites
+under witness guidance, and reducing composite turnaround from multi-hour manual sessions to
+minutes, while preserving alignment with established composite interviewing practice.
+
+
+===== PAGE 11 =====
+
+11
+6. Results and Discussion
+6.1 Expected Advantages
+ Relative to manual composite sessions and one-shot generative baselines, the proposed
+framework is expected to provide the following advantages:
+• Speed: usable forensic-style sketches in minutes rather than multi-hour artist sessions.
+• Procedural consistency: protocol-constrained interviewing reduces operator-dependent drift.
+• Feature-level control: refinement updates selected attributes without discarding overall identity.
+• Investigator alignment: Next.js session UI supports interview chat, sketch review, and guided
+revision.
+• Measurable research quality: optional validation metrics (FID, attribute consistency,
+ArcFace/FaceNet similarity) enable objective comparison.
+6.2 Discussion of Design Choices
+ Placing an interactive Cognitive-Interview-style agent at the front of the pipeline is intentional.
+Forensic accuracy depends less on unconstrained prompt creativity and more on faithful elicitation
+of witness memory. A living Face Feature Profile separates language understanding from image
+synthesis, enabling controllable edits analogous to catalog-based composite construction. Explicit
+sketch rendering acknowledges that investigative circulation typically requires pencil-style
+composites rather than photorealistic portraits alone. The refinement interview module
+operationalizes continuous witness authority—the same principle that governs successful
+hand-drawn composite sessions.
+ Compared with the base Gen-AI paper’s prompt → diffusion → mugshot-search design, the
+present architecture sacrifices some end-to-end simplicity in favor of interview realism, modular
+replaceability, and attribute-level editing. This trade-off is appropriate for a research system whose
+primary claim is alignment with forensic practice rather than maximal generative novelty.
+6.3 Possible Limitations
+• Witness memory may be incomplete, distorted, or trauma-affected; the system cannot invent
+reliable detail beyond recalled information.
+• Training corpora such as CelebA and FFHQ may under-represent demographic diversity and
+rare forensic marks (scars, tattoos).
+• Controlling sparse attributes in generative models remains challenging and may require
+additional conditioning strategies.
+• Sketch-domain shift can reduce biometric matching scores relative to photo–photo baselines;
+style-invariant evaluation may be required.
+• The system is research-grade assistance and must not be treated as legal identification evidence.
+6.4 Evaluation Metrics
+ System effectiveness will be assessed across three complementary domains:
+
+
+===== PAGE 12 =====
+
+12
+• Generation quality: Fréchet Inception Distance (FID) and Inception Score (IS).
+• Text–attribute alignment: CLIP score and attribute consistency against the interview profile.
+• Identity preservation: ArcFace / FaceNet cosine similarity between generated outputs and
+reference images where available.
+ Together, these metrics evaluate whether sketches are visually coherent, faithful to elicited
+descriptors, and identity-preserving under research conditions.
+6.5 Future Improvements
+• Richer multimodal interview support (voice + text) while preserving protocol constraints.
+• Improved conditioning for scars, tattoos, and accessories.
+• Sketch-domain adaptation for more reliable biometric evaluation.
+• Controlled user studies with forensic practitioners and witness-role participants.
+• Fairness analysis across demographic groups represented in generated composites.
+6.6 Ethical and Operational Notes
+ The proposed system is designed strictly as an investigative assistance aid. Generated
+composites reflect witness-reported memory and interview responses; they must not be treated as
+definitive biometric identification evidence. Operators should avoid suggestive questioning that
+could contaminate memory, consistent with Cognitive Interview best practice. Demographic bias in
+training corpora and the risk of over-trusting generative outputs are acknowledged as open concerns
+for subsequent fairness analysis. Data handling for any future operational deployment must comply
+with applicable institutional and legal requirements for witness information, image retention, and
+access control.
+References
+[1] Soppari, K., Pruthvi, A., Kiran, N. U., & Moses, V. S. (2026). Forensic sketch generation using Gen-AI.
+ World Journal of Advanced Research and Reviews, 30(1), 164–171.
+[2] Nasir, O. R., et al. (2019). Text2FaceGAN: Face generation from fine-grained textual descriptions. IEEE
+ BigMM.
+[3] Chen, X., Qing, L., He, X., Luo, X., & Xu, Y. (2019). FTGAN: A fully-trained generative adversarial
+ network for text to face generation. arXiv:1904.05729.
+[4] Khan, M. Z., et al. (2021). A realistic image generation of face from text description using the fully
+ trained generative adversarial networks. IEEE Access, 9.
+[5] Xia, W., Yang, Y., Xue, J.-H., & Wu, B. (2021). TediGAN: Text-guided diverse face image generation
+ and manipulation. CVPR.
+[6] Oza, M., et al. (2021). Semantic text-to-face GAN (ST²FG). arXiv:2107.10756.
+ 
+[7] Devakumar, S., & Sarath, G. (2023). Forensic sketch to real image using DCGAN. Procedia Computer
+ Science, 218, 1612–1620.
+[8] Bushra, S. N., & Maheswari, K. U. (2021). Crime investigation using DCGAN by forensic sketch-to-face
+ transformation (STF)—A review. ICCMC.
+[9] Kazemi, H., et al. Facial attributes guided deep sketch-to-photo synthesis. West Virginia University.
+ 
+
+===== PAGE 13 =====
+
+13
+[10] Li, Y., et al. (2024). Few-shot face sketch-to-photo synthesis via global-local asymmetric
+ image-to-image translation. ACM TOMM.
+[11] Yu, S., et al. (2019). Improving face sketch recognition via adversarial sketch-photo transformation. FG
+ 2019.
+[12] Jain, K. K., et al. (2024). CLIP4Sketch: Enhancing sketch-to-mugshot matching. IJCB.
+ 
+[13] Karras, T., et al. (2020). Analyzing and improving the image quality of StyleGAN. CVPR.
+ 
+[14] Deng, J., Guo, J., Xue, N., & Zafeiriou, S. (2019). ArcFace: Additive angular margin loss for deep face
+ recognition. CVPR.
+[15] Schroff, F., Kalenichenko, D., & Philbin, J. (2015). FaceNet: A unified embedding for face recognition
+ and clustering. CVPR.
+[16] Galea, C., & Farrugia, R. A. (2017). Forensic face photo-sketch recognition using a deep learning-based
+ architecture. IEEE Signal Processing Letters.
