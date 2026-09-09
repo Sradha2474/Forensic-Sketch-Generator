@@ -109,6 +109,16 @@ export function buildPromptFromProfile(profile: FaceProfile): {
 }
 
 export function attachPrompt(profile: FaceProfile): FaceProfile {
-  const prompt = buildPromptFromProfile(profile);
-  return { ...profile, prompt };
+  const draft = buildPromptFromProfile(profile);
+  return {
+    ...profile,
+    prompt: {
+      draft_positive: draft.positive,
+      draft_negative: draft.negative,
+      // Until LLM refine runs, final == draft
+      positive: draft.positive,
+      negative: draft.negative,
+      refined_by: null,
+    },
+  };
 }

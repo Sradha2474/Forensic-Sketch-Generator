@@ -22,6 +22,7 @@ import {
   type FlatAnswer,
 } from "@/lib/face-profile";
 import { attachPrompt } from "@/lib/prompt-builder";
+import { refinePromptWithLLM } from "@/lib/prompt-refiner";
 
 interface AutoResizeProps {
   minHeight: number;
@@ -75,6 +76,9 @@ export default function ForensicIntake() {
   const [finalPrompt, setFinalPrompt] = useState<{
     positive: string;
     negative: string;
+    draft_positive?: string;
+    draft_negative?: string;
+    refined_by?: string | null;
   } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -135,7 +139,7 @@ export default function ForensicIntake() {
       { role: "user", text },
       {
         role: "ai",
-        text: "Understood. Pipeline: raw interview → attribute normalizer → structured profile → prompt builder. Pick an option or Other — answers are normalized to canonical tokens (e.g. \"Quite wide\" → nose.width: broad).",
+        text: "Understood. Pipeline: raw interview → normalizer → structured profile → draft prompt → LLM refine (OpenRouter). Pick an option or Other.",
       },
     ];
     setStarted(true);
@@ -190,40 +194,74 @@ export default function ForensicIntake() {
       setThinking(true);
       scrollToBottom();
 
-      const completed = attachPrompt(
-        buildProfileFromAnswers(
-          nextAnswers,
-          openedWith || "interview",
-          INTERVIEW_QUESTION_COUNT,
-          true,
-        ),
-      );
-      const prompt = completed.prompt!;
+      void (async () => {
+        const drafted = attachPrompt(
+          buildProfileFromAnswers(
+            nextAnswers,
+            openedWith || "interview",
+            INTERVIEW_QUESTION_COUNT,
+            true,
+          ),
+        );
 
-      void logToTerminal("interview_complete", completed, prompt);
-      console.info("[1 RAW INTERVIEW]", completed.raw_interview);
-      console.info("[2 STRUCTURED PROFILE]", completed.structured_values);
-      console.info("[2 STRUCTURED + confidence]", completed.structured);
-      console.info("[3 PROMPT positive]", prompt.positive);
-      console.info("[3 PROMPT negative]", prompt.negative);
+        console.info("[1 RAW INTERVIEW]", drafted.raw_interview);
+        console.info("[2 STRUCTURED PROFILE]", drafted.structured_values);
+        console.info("[3 DRAFT PROMPT]", drafted.prompt);
 
-      setTimeout(() => {
+        setMessages([
+          ...base,
+          { role: "status", text: "Normalizing attributes → structured profile…" },
+          { role: "status", text: "Building draft prompt…" },
+          { role: "status", text: "Refining with LLM (OpenRouter)…" },
+        ]);
+        scrollToBottom();
+
+        const refine = await refinePromptWithLLM({
+          structured_values: drafted.structured_values,
+          structured: drafted.structured,
+          draft: {
+            positive: drafted.prompt!.draft_positive,
+            negative: drafted.prompt!.draft_negative,
+          },
+        });
+
+        const completed = {
+          ...drafted,
+          prompt: {
+            draft_positive: drafted.prompt!.draft_positive,
+            draft_negative: drafted.prompt!.draft_negative,
+            positive: refine.ok && refine.prompt
+              ? refine.prompt.positive
+              : drafted.prompt!.positive,
+            negative: refine.ok && refine.prompt
+              ? refine.prompt.negative
+              : drafted.prompt!.negative,
+            refined_by: refine.ok ? refine.model ?? "openrouter" : null,
+          },
+        };
+
+        const prompt = completed.prompt!;
+        void logToTerminal("interview_complete", completed, {
+          positive: prompt.positive,
+          negative: prompt.negative,
+        });
+        console.info("[4 FINAL LLM PROMPT]", prompt);
+
         setThinking(false);
         setFinalPrompt(prompt);
         setMessages([
           ...base,
           { role: "status", text: "Normalizing attributes → structured profile…" },
-          {
-            role: "status",
-            text: `${nextAnswers.length} raw answers → canonical JSON → prompt`,
-          },
+          { role: "status", text: "Draft prompt → LLM refine…" },
           {
             role: "ai",
-            text: "Interview complete. Raw answers were normalized into a structured face profile (canonical tokens + confidence), then turned into a generation prompt — see the panel and your npm run dev terminal.",
+            text: refine.ok
+              ? `Done. Pipeline finished: raw → normalizer → structured → draft prompt → LLM refine (${prompt.refined_by}). Final witness-style prompt is below and in your terminal.`
+              : `Structured profile + draft prompt ready. LLM refine failed (${refine.error ?? "unknown"}) — showing draft prompt. Check OPENROUTER_API_KEY in forenisic/.env and restart npm run dev.`,
           },
         ]);
         scrollToBottom();
-      }, 1200);
+      })();
     }
   };
 
@@ -339,10 +377,24 @@ export default function ForensicIntake() {
         {finalPrompt && (
           <div className="mb-3 space-y-3 rounded-xl border border-primary/40 bg-card/90 p-4 backdrop-blur-md">
             <div className="text-xs uppercase tracking-[0.2em] text-primary">
-              Prompt from structured profile (normalized) · {answers.length} raw → canonical
+              {finalPrompt.refined_by
+                ? `Final LLM prompt · ${finalPrompt.refined_by}`
+                : "Draft prompt (LLM refine skipped / failed)"}
             </div>
+            {finalPrompt.draft_positive && finalPrompt.refined_by && (
+              <details className="rounded-lg border border-border bg-background/40 p-2 text-xs">
+                <summary className="cursor-pointer text-muted-foreground">
+                  Show mechanical draft (pre-LLM)
+                </summary>
+                <pre className="mt-2 max-h-28 overflow-auto whitespace-pre-wrap text-foreground">
+                  {finalPrompt.draft_positive}
+                </pre>
+              </details>
+            )}
             <div>
-              <p className="mb-1 text-xs font-semibold text-muted-foreground">Positive</p>
+              <p className="mb-1 text-xs font-semibold text-muted-foreground">
+                Positive (witness-style)
+              </p>
               <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-background/60 p-3 text-xs leading-relaxed text-foreground">
                 {finalPrompt.positive}
               </pre>
@@ -354,7 +406,7 @@ export default function ForensicIntake() {
               </pre>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Full JSON + prompt also printed in the terminal running{" "}
+              Also printed in the terminal running{" "}
               <code className="rounded bg-muted px-1">npm run dev</code>.
             </p>
           </div>

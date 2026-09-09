@@ -25,7 +25,7 @@ export type FlatAnswer = {
 
 export type FaceProfile = {
   version: "0.2";
-  pipeline: "raw_interview → attribute_normalizer → structured_profile → prompt_builder";
+  pipeline: "raw_interview → attribute_normalizer → structured_profile → prompt_builder → llm_refine";
   session: {
     opened_with: string;
     completed_at: string | null;
@@ -39,8 +39,13 @@ export type FaceProfile = {
   /** Convenience: structured values without confidence/raw */
   structured_values: Record<string, Record<string, string>>;
   prompt?: {
+    /** Mechanical draft from structured tokens */
+    draft_positive: string;
+    draft_negative: string;
+    /** LLM-refined witness-style prompt for generation */
     positive: string;
     negative: string;
+    refined_by?: string | null;
   };
 };
 
@@ -58,7 +63,7 @@ export function buildProfileFromAnswers(
   return {
     version: "0.2",
     pipeline:
-      "raw_interview → attribute_normalizer → structured_profile → prompt_builder",
+      "raw_interview → attribute_normalizer → structured_profile → prompt_builder → llm_refine",
     session: {
       opened_with: openedWith,
       completed_at: completed ? new Date().toISOString() : null,
