@@ -23,6 +23,11 @@ import {
 } from "@/lib/face-profile";
 import { attachPrompt } from "@/lib/prompt-builder";
 import { refinePromptWithLLM } from "@/lib/prompt-refiner";
+import {
+  generateCompare,
+  imageSrc,
+  type CompareImage,
+} from "@/lib/generate-compare";
 
 interface AutoResizeProps {
   minHeight: number;
@@ -80,6 +85,12 @@ export default function ForensicIntake() {
     draft_negative?: string;
     refined_by?: string | null;
   } | null>(null);
+  const [compareImages, setCompareImages] = useState<{
+    draft: CompareImage;
+    final: CompareImage;
+  } | null>(null);
+  const [generatingImages, setGeneratingImages] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const logToTerminal = async (
@@ -249,17 +260,69 @@ export default function ForensicIntake() {
 
         setThinking(false);
         setFinalPrompt(prompt);
+        setCompareImages(null);
+        setGenerateError(null);
+        setGeneratingImages(true);
         setMessages([
           ...base,
           { role: "status", text: "Normalizing attributes → structured profile…" },
           { role: "status", text: "Draft prompt → LLM refine…" },
           {
+            role: "status",
+            text: "Generating draft vs LLM-refined sketches (SD worker)…",
+          },
+          {
             role: "ai",
             text: refine.ok
-              ? `Done. Pipeline finished: raw → normalizer → structured → draft prompt → LLM refine (${prompt.refined_by}). Final witness-style prompt is below and in your terminal.`
-              : `Structured profile + draft prompt ready. LLM refine failed (${refine.error ?? "unknown"}) — showing draft prompt. Check OPENROUTER_API_KEY in forenisic/.env and restart npm run dev.`,
+              ? `Prompts ready (${prompt.refined_by}). Generating two comparison sketches…`
+              : `LLM refine failed (${refine.error ?? "unknown"}) — comparing draft vs fallback. Generating sketches…`,
           },
         ]);
+        scrollToBottom();
+
+        const compare = await generateCompare({
+          draft: {
+            positive: prompt.draft_positive ?? prompt.positive,
+            negative: prompt.draft_negative ?? prompt.negative,
+          },
+          final: {
+            positive: prompt.positive,
+            negative: prompt.negative,
+          },
+          draft_seed: 42,
+          final_seed: 43,
+        });
+
+        setGeneratingImages(false);
+
+        if (compare.ok) {
+          setCompareImages({
+            draft: compare.draft_image,
+            final: compare.final_image,
+          });
+          console.info("[5 COMPARE IMAGES]", {
+            draft_seed: compare.draft_image.seed,
+            final_seed: compare.final_image.seed,
+          });
+          setMessages((prev) => [
+            ...prev.filter((m) => m.role !== "status"),
+            {
+              role: "ai",
+              text: "Sketches ready — draft (mechanical) vs LLM-refined side by side below.",
+            },
+          ]);
+        } else {
+          setGenerateError(
+            [compare.error, compare.hint].filter(Boolean).join(" — "),
+          );
+          setMessages((prev) => [
+            ...prev.filter((m) => m.role !== "status"),
+            {
+              role: "ai",
+              text: `Prompts are ready, but image generation failed: ${compare.error}. Start the Python worker (uvicorn api.main:app --port 8000) and try again.`,
+            },
+          ]);
+        }
         scrollToBottom();
       })();
     }
@@ -374,6 +437,49 @@ export default function ForensicIntake() {
       </div>
 
       <div className={cn("relative w-full max-w-3xl px-4", started ? "mb-6" : "mb-[14vh]")}>
+        {(generatingImages || compareImages || generateError) && (
+          <div className="mb-3 space-y-3 rounded-xl border border-primary/40 bg-card/90 p-4 backdrop-blur-md">
+            <div className="text-xs uppercase tracking-[0.2em] text-primary">
+              Sketch compare · draft vs LLM-refined
+            </div>
+            {generatingImages && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" />
+                Running Stable Diffusion worker (two jobs)…
+              </div>
+            )}
+            {generateError && (
+              <p className="text-sm text-destructive">{generateError}</p>
+            )}
+            {compareImages && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <figure className="space-y-2">
+                  <figcaption className="text-xs font-semibold text-muted-foreground">
+                    Draft (mechanical) · seed {compareImages.draft.seed}
+                  </figcaption>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageSrc(compareImages.draft)}
+                    alt="Draft forensic sketch from mechanical prompt"
+                    className="w-full rounded-lg border border-border bg-background object-contain"
+                  />
+                </figure>
+                <figure className="space-y-2">
+                  <figcaption className="text-xs font-semibold text-muted-foreground">
+                    LLM-refined · seed {compareImages.final.seed}
+                  </figcaption>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageSrc(compareImages.final)}
+                    alt="LLM-refined forensic sketch"
+                    className="w-full rounded-lg border border-border bg-background object-contain"
+                  />
+                </figure>
+              </div>
+            )}
+          </div>
+        )}
+
         {finalPrompt && (
           <div className="mb-3 space-y-3 rounded-xl border border-primary/40 bg-card/90 p-4 backdrop-blur-md">
             <div className="text-xs uppercase tracking-[0.2em] text-primary">
