@@ -1,5 +1,5 @@
 """
-AI-Assisted Forensic Sketch Generator — polished MVP demo UI.
+LEGACY Streamlit UI — retired. Prefer Next.js + FastAPI (see ../README.md).
 
 Flow:
   Witness text → AI improve description → forensic prompt → SD sketch → download
@@ -19,9 +19,12 @@ import streamlit as st
 os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
 os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 
-ROOT = Path(__file__).resolve().parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+# Product root is parent of legacy/
+ROOT = Path(__file__).resolve().parent.parent
+LEGACY = Path(__file__).resolve().parent
+for p in (ROOT, LEGACY):
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
 
 from ai.description_enhancer import enhance_description
 from ai.forensic_prompt import build_face_seed_prompt, build_forensic_prompt

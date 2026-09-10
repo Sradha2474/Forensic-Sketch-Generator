@@ -1,158 +1,138 @@
-# 🕵️ AI-Assisted Forensic Sketch Generator
+# AI-Assisted Forensic Sketch Generator
 
-### Transform witness descriptions into graphite forensic composites — in seconds.
+Next.js interview UI + FastAPI Stable Diffusion worker. Produces **draft vs LLM-refined** forensic sketches for research comparison.
 
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.60-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org)
-[![Diffusers](https://img.shields.io/badge/🤗%20Diffusers-SD%201.5-FFD21E?style=for-the-badge)](https://huggingface.co/docs/diffusers)
-[![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](LICENSE)
-
-<p align="center">
-  <img src="https://img.shields.io/badge/STAAR%20MVP-50%25%20Research%20Demo-8B5CF6?style=flat-square" />
-  <img src="https://img.shields.io/badge/UI-Dark%20Glassmorphism-4F7CFF?style=flat-square" />
-  <img src="https://img.shields.io/badge/Pipeline-txt2img%20→%20img2img%20→%20polish-34D399?style=flat-square" />
-</p>
-
----
-
-## ✨ What is this?
-
-Law enforcement composites usually need a skilled forensic artist. This **MVP** lets an investigator (or witness) **type a description**, optionally **improve it with AI**, then generate a **forensic pencil-style sketch** using Stable Diffusion.
-
-> Built as a realistic **50% STAAR research demo** — polished enough to present, modular enough to grow into the full system (interview agent, LoRA sketch model, database search).
-
----
-
-## 🖥️ Product UI
-
-| Left panel | Right panel |
+| Layer | Stack |
 |---|---|
-| Witness description box | Empty sketchboard → final sketch |
-| 🎤 Voice (placeholder) | Prompt used |
-| ✨ AI Suggest Description | Status + download |
-| 🎨 Generate Sketch | Generate again |
-
-**Theme:** dark mode · glass cards · blue/purple accents · ChatGPT / Cursor inspired.
+| UI / interview / LLM refine | Next.js (`forenisic/`) · OpenRouter |
+| Image worker | FastAPI · Diffusers **SD 1.5** · OpenCV polish |
+| Legacy | Streamlit demo archived under `legacy/` |
 
 ---
 
-## 🧠 How it works
+## Architecture
 
 ```text
-Witness text
-    │
+Next.js forensic.tsx
+    │  interview → normalize → structured → draft prompt
+    │  → OpenRouter refine → final prompt
     ▼
-✨ AI description enhancer   (structured forensic wording)
+POST /api/generate-compare   (Promise.all)
     │
-    ▼
-Prompt engineer              (CLIP-safe forensic sketch prompt)
-    │
-    ├─► SD txt2img           clear face
-    │
-    └─► SD img2img           graphite pencil refine
+    ├─► POST :8000/generate  (draft prompt, seed 42)
+    └─► POST :8000/generate  (final prompt, seed 43)
             │
             ▼
-        Dodge & burn polish  (report Phase-4 style transfer)
+        SD txt2img → img2img pencil → dodge/burn polish
             │
             ▼
-        Streamlit sketchboard + download
+        Side-by-side images in the UI
 ```
 
-**Important:** raw witness text is never sent straight to the model. The system always builds an improved description and a clean forensic prompt first.
+GPU jobs are serialized inside FastAPI (lock) so one card does not OOM; Next still fires both requests concurrently.
 
 ---
 
-## 🛠️ Tech stack
+## Quick start (two processes)
 
-| Layer | Technology |
-|---|---|
-| Frontend | Streamlit (custom CSS glass UI) |
-| Description AI | Rule-based enhancer (LLM-ready stub) |
-| Generation | Hugging Face **Diffusers** · **Stable Diffusion v1.5** |
-| Runtime | **PyTorch** (CPU or CUDA) |
-| Sketch polish | OpenCV dodge & burn + Laplacian edges |
-| Packaging | Modular `ai/` · `ui/` · `utils/` · `extensions/` |
+### 1. Python worker (Terminal A)
 
----
-
-## 🚀 Quick start
+`api/` lives in the **nested product folder**, not the outer research journal root.
 
 ```bash
-git clone https://github.com/Sradha2474/Forensic-Sketch-Generator.git
+# If you are in D:\Forensic-Sketch-Generator (outer journal):
 cd Forensic-Sketch-Generator
 
 python -m venv .venv
-
 # Windows
 .\.venv\Scripts\Activate.ps1
-
 # macOS / Linux
 source .venv/bin/activate
 
 pip install -r requirements.txt
-streamlit run app.py
+uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Open the local URL Streamlit prints (usually `http://localhost:8501`).
+Or from the outer journal root: double-click / run `run-backend.bat` (cds into the product folder for you).
 
-> First run downloads SD 1.5 weights into `model_cache/` (one-time). CPU works; GPU is much faster.
+Health: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+
+First run downloads SD 1.5 into `model_cache/`.
+
+### 2. Next.js UI (Terminal B)
+
+```bash
+cd forenisic
+cp .env.example .env   # if needed
+# edit .env — see env vars below
+npm install
+npm run dev
+```
+
+Or `run-forensic-ui.bat`.
+
+Open [http://localhost:3000](http://localhost:3000) → finish the interview → see **Draft | LLM-refined** sketches.
 
 ---
 
-## 🎮 Demo flow
+## Environment variables (`forenisic/.env`)
 
-1. Type something short: `Man with beard.`
-2. Click **✨ AI Suggest Description**
-3. Review / edit the improved text
-4. Click **🎨 Generate Sketch**
-5. Download the PNG
+```env
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_MODEL=openai/gpt-4o-mini
+PYTHON_BACKEND_URL=http://127.0.0.1:8000
+```
 
-Example engineered prompt style:
+| Variable | Purpose |
+|---|---|
+| `OPENROUTER_API_KEY` | Server-side LLM refine (`/api/refine-prompt`) |
+| `OPENROUTER_MODEL` | Optional; default `openai/gpt-4o-mini` |
+| `PYTHON_BACKEND_URL` | FastAPI base URL for `/api/generate-compare` |
 
-> *A realistic forensic facial sketch of a male, approximately 35 years old, oval face, medium complexion, full black beard… pencil sketch, front view, highly detailed forensic style.*
+Restart `npm run dev` after changing `.env`.
 
 ---
 
-## 📁 Project structure
+## API surface
+
+### FastAPI (`:8000`)
+
+| Method | Path | Body / notes |
+|---|---|---|
+| `GET` | `/health` | Model loaded / device |
+| `POST` | `/generate` | `{ prompt, negative_prompt?, seed?, label? }` → `{ label, seed, image_base64 }` |
+
+### Next.js
+
+| Method | Path | Notes |
+|---|---|---|
+| `POST` | `/api/refine-prompt` | OpenRouter rewrite |
+| `POST` | `/api/generate-compare` | `{ draft, final }` → both images via `Promise.all` |
+
+---
+
+## Project structure
 
 ```text
 Forensic-Sketch-Generator/
-├── app.py                      # Streamlit product UI
+├── api/main.py              # FastAPI SD worker
+├── ai/                      # ImageGenerator, prompts, polish (keep)
+├── utils/config.py
+├── forenisic/               # Next.js product UI
+│   ├── app/api/generate-compare/
+│   ├── components/forensic.tsx
+│   └── .env
+├── legacy/                  # Retired Streamlit UI
+├── outputs/                 # Saved PNGs
+├── model_cache/
 ├── requirements.txt
-├── README.md
-├── .streamlit/config.toml      # Dark theme
-├── ai/
-│   ├── description_enhancer.py # Improve witness notes
-│   ├── forensic_prompt.py      # Clean SD prompts
-│   ├── prompt_builder.py       # Structured profile → prompt
-│   ├── image_generator.py      # txt2img + img2img
-│   └── sketch_processor.py     # Dodge & burn polish
-├── ui/
-│   └── styles.py               # Glassmorphism theme
-├── utils/
-│   ├── config.py
-│   └── profile.py              # JSON witness profile schema
-├── extensions/                 # Future: agent, edit, eval, DB
-├── tests/
-└── outputs/                    # Saved sketches (gitignored)
+├── run-backend.bat
+└── run-forensic-ui.bat
 ```
 
 ---
 
-## 🔮 Roadmap (beyond this MVP)
-
-| Module | Status | Path |
-|---|---|---|
-| Conversational interview agent | Stub | `extensions/interview_agent.py` |
-| Sketch LoRA fine-tune | Planned | replace img2img refine |
-| Selective region editing | Stub | `extensions/selective_edit.py` |
-| Evaluation metrics | Stub | `extensions/evaluation.py` |
-| Criminal gallery search | Stub | `extensions/database_search.py` |
-
----
-
-## 🧪 Tests
+## Tests
 
 ```bash
 pytest tests/ -q
@@ -160,23 +140,14 @@ pytest tests/ -q
 
 ---
 
-## ⚠️ Ethics
+## Ethics
 
-For **education and research** only. Do not treat generated sketches as courtroom evidence. Models can inherit dataset bias — involve trained professionals for real investigations.
+Education and research only. Do not treat generated sketches as courtroom evidence.
 
 ---
 
-## 👩‍💻 Authors
+## Authors
 
-STAAR project · C.V. Raman Global University  
+STAAR · C.V. Raman Global University  
 **Sradha Ram** · Tusharkanta Behera · Sandeep Kumar Swain  
 Supervisor: **Dr. Sukant Kishoro Bisoy**
-
-Repo: [Sradha2474/Forensic-Sketch-Generator](https://github.com/Sradha2474/Forensic-Sketch-Generator)
-
----
-
-<p align="center">
-  <b>Bridge witness memory and visual evidence with AI.</b><br/>
-  ★ Star the repo if this helps your research.
-</p>

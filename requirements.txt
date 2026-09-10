@@ -1,7 +1,8 @@
-# Forensic Sketch Generator — 50% MVP dependencies
+# Forensic Sketch Generator — backend + tooling
 # Python 3.10+ recommended
 
-streamlit>=1.28.0
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
 torch>=2.0.0
 torchvision>=0.15.0
 diffusers>=0.25.0
@@ -12,3 +13,4 @@ Pillow>=10.0.0
 opencv-python-headless>=4.8.0
 numpy>=1.24.0
 pytest>=7.0.0
+# streamlit removed — UI is Next.js (forenisic/); legacy UI in legacy/
