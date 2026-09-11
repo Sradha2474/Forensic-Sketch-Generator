@@ -17,6 +17,7 @@ export type CompareResult =
       draft_image: CompareImage;
       final_image: CompareImage;
       backend?: string;
+      model?: string;
     }
   | { ok: false; error: string; hint?: string };
 
@@ -25,13 +26,13 @@ export async function generateCompare(args: {
   final: { positive: string; negative: string };
   draft_seed?: number;
   final_seed?: number;
+  model?: string;
 }): Promise<CompareResult> {
   try {
     const res = await fetch("/api/generate-compare", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(args),
-      // Browser: do not abort early; server route waits for Python SD jobs
     });
 
     let data: CompareResult;

@@ -19,9 +19,14 @@ import {
 } from "@/lib/interview-questions";
 import {
   buildProfileFromAnswers,
+  type FaceProfile,
   type FlatAnswer,
 } from "@/lib/face-profile";
-import { attachPrompt } from "@/lib/prompt-builder";
+import { buildPromptsForModel } from "@/lib/prompts";
+import {
+  GENERATION_MODELS,
+  type GenerationModelId,
+} from "@/lib/generation-models";
 import { refinePromptWithLLM } from "@/lib/prompt-refiner";
 import {
   generateCompare,
@@ -78,12 +83,22 @@ export default function ForensicIntake() {
   const [otherText, setOtherText] = useState("");
   const [answers, setAnswers] = useState<FlatAnswer[]>([]);
   const [openedWith, setOpenedWith] = useState("");
+  const [pendingProfile, setPendingProfile] = useState<FaceProfile | null>(
+    null,
+  );
+  const [awaitingModel, setAwaitingModel] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<GenerationModelId | null>(
+    null,
+  );
   const [finalPrompt, setFinalPrompt] = useState<{
     positive: string;
     negative: string;
     draft_positive?: string;
     draft_negative?: string;
     refined_by?: string | null;
+    mode?: string;
+    model?: string;
+    token_count_approx?: number;
   } | null>(null);
   const [compareImages, setCompareImages] = useState<{
     draft: CompareImage;
@@ -150,7 +165,7 @@ export default function ForensicIntake() {
       { role: "user", text },
       {
         role: "ai",
-        text: "Understood. Pipeline: raw interview → normalizer → structured profile → draft prompt → LLM refine (OpenRouter). Pick an option or Other.",
+        text: "Understood. Pipeline: interview → structured profile → choose model → micro/original prompt → LLM refine → generate. Pick an option or Other.",
       },
     ];
     setStarted(true);
@@ -158,6 +173,11 @@ export default function ForensicIntake() {
     setMessages(base);
     setAnswers([]);
     setFinalPrompt(null);
+    setPendingProfile(null);
+    setAwaitingModel(false);
+    setSelectedModel(null);
+    setCompareImages(null);
+    setGenerateError(null);
     setInput("");
     adjustHeight(true);
     askQuestion(0, base);
@@ -202,134 +222,155 @@ export default function ForensicIntake() {
       askQuestion(next, base);
     } else {
       setFinished(true);
-      setThinking(true);
+      const profile = buildProfileFromAnswers(
+        nextAnswers,
+        openedWith || "interview",
+        INTERVIEW_QUESTION_COUNT,
+        true,
+      );
+      setPendingProfile(profile);
+      setAwaitingModel(true);
+      setThinking(false);
+      setMessages([
+        ...base,
+        {
+          role: "ai",
+          text: "Interview complete. Choose a generation model below. SD 1.5 uses a micro (≤77-token) prompt; Flux / SD 3 will use the full original prompt when available.",
+        },
+      ]);
       scrollToBottom();
-
-      void (async () => {
-        const drafted = attachPrompt(
-          buildProfileFromAnswers(
-            nextAnswers,
-            openedWith || "interview",
-            INTERVIEW_QUESTION_COUNT,
-            true,
-          ),
-        );
-
-        console.info("[1 RAW INTERVIEW]", drafted.raw_interview);
-        console.info("[2 STRUCTURED PROFILE]", drafted.structured_values);
-        console.info("[3 DRAFT PROMPT]", drafted.prompt);
-
-        setMessages([
-          ...base,
-          { role: "status", text: "Normalizing attributes → structured profile…" },
-          { role: "status", text: "Building draft prompt…" },
-          { role: "status", text: "Refining with LLM (OpenRouter)…" },
-        ]);
-        scrollToBottom();
-
-        const refine = await refinePromptWithLLM({
-          structured_values: drafted.structured_values,
-          structured: drafted.structured,
-          draft: {
-            positive: drafted.prompt!.draft_positive,
-            negative: drafted.prompt!.draft_negative,
-          },
-        });
-
-        const completed = {
-          ...drafted,
-          prompt: {
-            draft_positive: drafted.prompt!.draft_positive,
-            draft_negative: drafted.prompt!.draft_negative,
-            positive: refine.ok && refine.prompt
-              ? refine.prompt.positive
-              : drafted.prompt!.positive,
-            negative: refine.ok && refine.prompt
-              ? refine.prompt.negative
-              : drafted.prompt!.negative,
-            refined_by: refine.ok ? refine.model ?? "openrouter" : null,
-          },
-        };
-
-        const prompt = completed.prompt!;
-        void logToTerminal("interview_complete", completed, {
-          positive: prompt.positive,
-          negative: prompt.negative,
-        });
-        console.info("[4 FINAL LLM PROMPT]", prompt);
-
-        setThinking(false);
-        setFinalPrompt(prompt);
-        setCompareImages(null);
-        setGenerateError(null);
-        setGeneratingImages(true);
-        setMessages([
-          ...base,
-          { role: "status", text: "Normalizing attributes → structured profile…" },
-          { role: "status", text: "Draft prompt → LLM refine…" },
-          {
-            role: "status",
-            text: "Generating draft vs LLM faces (SD 1.5, same seed)…",
-          },
-          {
-            role: "ai",
-            text: refine.ok
-              ? `Prompts ready (${prompt.refined_by}). Generating two faces with seed 42 (prompt is the only variable). On CPU this often takes 10–20+ minutes per face — leave this tab open and watch the uvicorn terminal…`
-              : `LLM refine failed (${refine.error ?? "unknown"}) — comparing draft vs fallback faces (CPU generation can take a long time)…`,
-          },
-        ]);
-        scrollToBottom();
-
-        // Controlled A/B: same seed + same negative; only positive prompt differs.
-        const sharedNegative =
-          prompt.draft_negative ?? prompt.negative;
-        const compare = await generateCompare({
-          draft: {
-            positive: prompt.draft_positive ?? prompt.positive,
-            negative: sharedNegative,
-          },
-          final: {
-            positive: prompt.positive,
-            negative: sharedNegative,
-          },
-          draft_seed: 42,
-          final_seed: 42,
-        });
-
-        setGeneratingImages(false);
-
-        if (compare.ok) {
-          setCompareImages({
-            draft: compare.draft_image,
-            final: compare.final_image,
-          });
-          console.info("[5 COMPARE IMAGES]", {
-            draft_seed: compare.draft_image.seed,
-            final_seed: compare.final_image.seed,
-            shared_seed: 42,
-          });
-          setMessages((prev) => [
-            ...prev.filter((m) => m.role !== "status"),
-            {
-              role: "ai",
-              text: "Faces ready — Draft Prompt vs LLM Prompt (same seed) side by side below.",
-            },
-          ]);
-        } else {
-          setGenerateError(
-            [compare.error, compare.hint].filter(Boolean).join(" — "),
-          );
-          setMessages((prev) => [
-            ...prev.filter((m) => m.role !== "status"),
-            {
-              role: "ai",
-              text: `Prompts are ready, but image generation failed: ${compare.error}. Start the Python worker (uvicorn api.main:app --port 8000) and try again.`,
-            },
-          ]);
-        }
-        scrollToBottom();
-      })();
+      console.info("[1 RAW INTERVIEW]", profile.raw_interview);
+      console.info("[2 STRUCTURED PROFILE]", profile.structured_values);
     }
+  };
+
+  const runGenerationForModel = async (modelId: GenerationModelId) => {
+    if (!pendingProfile) return;
+    const modelMeta = GENERATION_MODELS.find((m) => m.id === modelId);
+    if (!modelMeta?.available) return;
+
+    setAwaitingModel(false);
+    setSelectedModel(modelId);
+    setThinking(true);
+    setGenerateError(null);
+    setCompareImages(null);
+    setFinalPrompt(null);
+
+    const routed = buildPromptsForModel(pendingProfile, modelId);
+    console.info("[3 ROUTED PROMPT]", routed);
+
+    setMessages((prev) => [
+      ...prev.filter((m) => m.role !== "status"),
+      {
+        role: "status",
+        text: `Routing ${modelMeta.label} → ${routed.mode} prompt (~${routed.token_count_approx} tokens)…`,
+      },
+      { role: "status", text: "Refining with LLM (OpenRouter)…" },
+    ]);
+    scrollToBottom();
+
+    const refine = await refinePromptWithLLM({
+      structured_values: pendingProfile.structured_values,
+      structured: pendingProfile.structured,
+      draft: {
+        positive: routed.positive,
+        negative: routed.negative,
+      },
+      prompt_mode: routed.mode,
+    });
+
+    const prompt = {
+      draft_positive: routed.positive,
+      draft_negative: routed.negative,
+      positive:
+        refine.ok && refine.prompt ? refine.prompt.positive : routed.positive,
+      negative:
+        refine.ok && refine.prompt ? refine.prompt.negative : routed.negative,
+      refined_by: refine.ok ? refine.model ?? "openrouter" : null,
+      mode: routed.mode,
+      model: modelId,
+      token_count_approx: routed.token_count_approx,
+      original_positive: routed.original_positive,
+      micro_positive: routed.micro_positive,
+    };
+
+    const completed = {
+      ...pendingProfile,
+      prompt,
+    };
+
+    void logToTerminal("interview_complete", completed, {
+      positive: prompt.positive,
+      negative: prompt.negative,
+    });
+    console.info("[4 FINAL LLM PROMPT]", prompt);
+
+    setThinking(false);
+    setFinalPrompt(prompt);
+    setGeneratingImages(true);
+    setMessages((prev) => [
+      ...prev.filter((m) => m.role !== "status"),
+      {
+        role: "status",
+        text: `Using ${modelMeta.label} · ${routed.mode} prompt · seed 42…`,
+      },
+      {
+        role: "ai",
+        text: refine.ok
+          ? `Prompts ready (${prompt.refined_by}). Mode=${routed.mode}. Generating draft vs LLM faces with seed 42. On CPU this often takes 10–20+ minutes per face — leave this tab open…`
+          : `LLM refine failed (${refine.error ?? "unknown"}) — comparing draft vs fallback faces…`,
+      },
+    ]);
+    scrollToBottom();
+
+    const sharedNegative = prompt.draft_negative ?? prompt.negative;
+    const compare = await generateCompare({
+      draft: {
+        positive: prompt.draft_positive ?? prompt.positive,
+        negative: sharedNegative,
+      },
+      final: {
+        positive: prompt.positive,
+        negative: sharedNegative,
+      },
+      draft_seed: 42,
+      final_seed: 42,
+      model: modelId,
+    });
+
+    setGeneratingImages(false);
+
+    if (compare.ok) {
+      setCompareImages({
+        draft: compare.draft_image,
+        final: compare.final_image,
+      });
+      console.info("[5 COMPARE IMAGES]", {
+        model: modelId,
+        mode: routed.mode,
+        draft_seed: compare.draft_image.seed,
+        final_seed: compare.final_image.seed,
+      });
+      setMessages((prev) => [
+        ...prev.filter((m) => m.role !== "status"),
+        {
+          role: "ai",
+          text: `Faces ready — ${modelMeta.label} (${routed.mode} prompt) · Draft vs LLM (same seed) below.`,
+        },
+      ]);
+    } else {
+      setGenerateError(
+        [compare.error, compare.hint].filter(Boolean).join(" — "),
+      );
+      setMessages((prev) => [
+        ...prev.filter((m) => m.role !== "status"),
+        {
+          role: "ai",
+          text: `Prompts are ready, but image generation failed: ${compare.error}. Start the Python worker (uvicorn api.main:app --port 8000) and try again.`,
+        },
+      ]);
+    }
+    scrollToBottom();
   };
 
   const sendOther = () => {
@@ -374,7 +415,8 @@ export default function ForensicIntake() {
           {!started && (
             <p className="mt-3 text-base text-muted-foreground">
               Tell the assistant you want to generate a suspect image. It will run a
-              compact 40-question facial interview, then prepare the composite.
+              compact 40-question facial interview, then let you choose a model
+              (SD 1.5 uses a micro ≤77-token prompt).
             </p>
           )}
           {started && !finished && (
@@ -441,10 +483,55 @@ export default function ForensicIntake() {
       </div>
 
       <div className={cn("relative w-full max-w-3xl px-4", started ? "mb-6" : "mb-[14vh]")}>
+        {awaitingModel && pendingProfile && (
+          <div className="mb-3 space-y-3 rounded-xl border border-primary/40 bg-card/90 p-4 backdrop-blur-md">
+            <div className="text-xs uppercase tracking-[0.2em] text-primary">
+              Choose generation model
+            </div>
+            <p className="text-sm text-muted-foreground">
+              CLIP-limited models use a <strong>micro</strong> prompt (≤77 tokens).
+              Flux / SD 3 will use the <strong>original</strong> full prompt when enabled.
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {GENERATION_MODELS.map((m) => (
+                <Button
+                  key={m.id}
+                  variant="outline"
+                  disabled={!m.available || generatingImages || thinking}
+                  onClick={() => void runGenerationForModel(m.id)}
+                  className={cn(
+                    "h-auto flex-col items-start gap-1 whitespace-normal rounded-lg px-3 py-3 text-left",
+                    m.available
+                      ? "border-primary/50 hover:border-primary hover:bg-primary/10"
+                      : "opacity-60",
+                  )}
+                >
+                  <span className="text-sm font-semibold text-foreground">
+                    {m.label}
+                    {!m.available && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Coming soon
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {m.description}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Prompt: {m.promptMode}
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {(generatingImages || compareImages || generateError) && (
           <div className="mb-3 space-y-3 rounded-xl border border-primary/40 bg-card/90 p-4 backdrop-blur-md">
             <div className="text-xs uppercase tracking-[0.2em] text-primary">
               Prompt compare · generated faces · seed 42
+              {selectedModel ? ` · ${selectedModel}` : ""}
+              {finalPrompt?.mode ? ` · ${finalPrompt.mode}` : ""}
             </div>
             {generatingImages && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -492,6 +579,10 @@ export default function ForensicIntake() {
               {finalPrompt.refined_by
                 ? `Final LLM prompt · ${finalPrompt.refined_by}`
                 : "Draft prompt (LLM refine skipped / failed)"}
+              {finalPrompt.mode ? ` · ${finalPrompt.mode}` : ""}
+              {finalPrompt.token_count_approx != null
+                ? ` · ~${finalPrompt.token_count_approx} tokens (draft)`
+                : ""}
             </div>
             {finalPrompt.draft_positive && finalPrompt.refined_by && (
               <details className="rounded-lg border border-border bg-background/40 p-2 text-xs">
@@ -610,7 +701,9 @@ export default function ForensicIntake() {
             placeholder={
               !started
                 ? "Type: I want to generate a suspect image…"
-                : finished
+                : finished && awaitingModel
+                  ? "Choose a model above to generate…"
+                  : finished
                   ? "Interview finished — profile recorded"
                   : "Or type a free-text answer for this question…"
             }

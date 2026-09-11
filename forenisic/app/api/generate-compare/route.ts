@@ -26,6 +26,8 @@ type GenerateBody = {
   final?: PromptPair;
   draft_seed?: number;
   final_seed?: number;
+  /** Experiment 1B model id (sd15 today) */
+  model?: string;
 };
 
 type GenerateOk = {
@@ -85,12 +87,14 @@ async function callGenerate(
   label: string,
   prompt: PromptPair,
   seed: number,
+  model: string,
 ): Promise<GenerateOk> {
   const { status, text } = await postJsonNoTimeout(`${BACKEND}/generate`, {
     prompt: prompt.positive,
     negative_prompt: prompt.negative ?? null,
     seed,
     label,
+    model,
   });
 
   if (status < 200 || status >= 300) {
@@ -118,26 +122,30 @@ export async function POST(req: Request) {
     }
 
     const compareSeed = body.draft_seed ?? body.final_seed ?? 42;
+    const model = body.model?.trim() || "sd15";
 
     console.log("\n" + "─".repeat(72));
     console.log("[Forensic] generate-compare →", BACKEND);
     console.log(
-      "  shared seed",
+      "  model",
+      model,
+      "shared seed",
       compareSeed,
       "(draft then LLM sequentially; CPU may take 10–20+ min each)",
     );
     console.log("─".repeat(72));
 
     console.log("[Forensic] generating draft …");
-    const draftRes = await callGenerate("draft", draft, compareSeed);
+    const draftRes = await callGenerate("draft", draft, compareSeed, model);
     console.log("[Forensic] draft OK — generating LLM/final …");
-    const finalRes = await callGenerate("final", final, compareSeed);
+    const finalRes = await callGenerate("final", final, compareSeed, model);
 
     console.log("[Forensic] generate-compare OK — both images received");
     console.log("─".repeat(72) + "\n");
 
     return NextResponse.json({
       ok: true,
+      model,
       draft_image: {
         label: draftRes.label,
         seed: draftRes.seed,

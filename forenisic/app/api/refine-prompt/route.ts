@@ -3,16 +3,12 @@ import { NextResponse } from "next/server";
 /**
  * LLM refine layer (OpenRouter)
  *
- * draft prompt (from structured profile)
- *        ↓
- * OpenRouter chat (gpt-4o-mini by default)
- *        ↓
- * natural witness-style FINAL prompt for SDXL / FLUX
- *
- * API key stays server-side only (never sent to the browser).
+ * prompt_mode:
+ *   original → long witness-style (Flux / SD3 path)
+ *   micro    → ≤~70 token rewrite (SD1.5 / ControlNet / SDXL)
  */
 
-const SYSTEM = `You are a forensic prompt engineer for face-image generation (SDXL / FLUX).
+const SYSTEM_ORIGINAL = `You are a forensic prompt engineer for face-image generation (Flux / SD 3).
 
 You receive:
 1) A structured face attribute JSON (canonical tokens + confidence)
@@ -35,12 +31,38 @@ Return ONLY valid JSON with this shape:
   "negative": "..."
 }`;
 
+const SYSTEM_MICRO = `You are a forensic prompt engineer for Stable Diffusion 1.5 (CLIP 77-token limit).
+
+You receive structured face attributes and a short draft micro-prompt.
+
+Rewrite into ONE ultra-compact positive prompt for SD 1.5.
+
+HARD RULES:
+- Positive prompt MUST be under 70 words/tokens (whitespace-separated). Prefer ~55–65.
+- Keep only the strongest identity cues: age, face shape, hair, eyes, nose, jaw/chin, facial hair, glasses, scars/moles, expression.
+- Dense comma-separated phrases OK. No essay. No filler.
+- Do NOT invent attributes missing from the JSON.
+- Do NOT mention JSON, confidence, pipelines, or that you are an AI.
+- Also produce a short negative prompt.
+
+Return ONLY valid JSON:
+{
+  "positive": "...",
+  "negative": "..."
+}`;
+
 function getApiKey(): string | undefined {
   return (
     process.env.OPENROUTER_API_KEY ||
     process.env.openrouter_api_key ||
     undefined
   );
+}
+
+function clipWords(text: string, max: number): string {
+  const tokens = text.trim().split(/\s+/).filter(Boolean);
+  if (tokens.length <= max) return tokens.join(" ");
+  return tokens.slice(0, max).join(" ");
 }
 
 export async function POST(req: Request) {
@@ -62,10 +84,12 @@ export async function POST(req: Request) {
       structured_values,
       structured,
       draft,
+      prompt_mode,
     } = body as {
       structured_values?: unknown;
       structured?: unknown;
       draft?: { positive?: string; negative?: string };
+      prompt_mode?: "micro" | "original";
     };
 
     if (!draft?.positive) {
@@ -75,10 +99,15 @@ export async function POST(req: Request) {
       );
     }
 
+    const mode = prompt_mode === "micro" ? "micro" : "original";
+    const system = mode === "micro" ? SYSTEM_MICRO : SYSTEM_ORIGINAL;
+
     const model =
       process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
 
     const userContent = [
+      `PROMPT_MODE: ${mode}`,
+      "",
       "STRUCTURED FACE ATTRIBUTES (canonical):",
       JSON.stringify(structured_values ?? structured ?? {}, null, 2),
       "",
@@ -88,11 +117,13 @@ export async function POST(req: Request) {
       "DRAFT NEGATIVE PROMPT:",
       draft.negative ?? "",
       "",
-      "Rewrite into the required JSON.",
+      mode === "micro"
+        ? "Rewrite into the required JSON. Keep positive under 70 tokens."
+        : "Rewrite into the required JSON.",
     ].join("\n");
 
     console.log("\n" + "─".repeat(72));
-    console.log("[Forensic] LLM refine → OpenRouter", model);
+    console.log("[Forensic] LLM refine → OpenRouter", model, `mode=${mode}`);
     console.log("─".repeat(72));
 
     const upstream = await fetch(
@@ -107,10 +138,10 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({
           model,
-          temperature: 0.4,
+          temperature: mode === "micro" ? 0.2 : 0.4,
           response_format: { type: "json_object" },
           messages: [
-            { role: "system", content: SYSTEM },
+            { role: "system", content: system },
             { role: "user", content: userContent },
           ],
         }),
@@ -146,8 +177,12 @@ export async function POST(req: Request) {
       if (parsed.positive?.trim()) positive = parsed.positive.trim();
       if (parsed.negative?.trim()) negative = parsed.negative.trim();
     } catch {
-      // If model returned prose, use it as positive
       if (content) positive = content;
+    }
+
+    // Enforce micro budget even if the LLM overshoots
+    if (mode === "micro") {
+      positive = clipWords(positive, 70);
     }
 
     console.log("\n>>> FINAL LLM PROMPT (positive)\n");
@@ -160,6 +195,7 @@ export async function POST(req: Request) {
       ok: true,
       prompt: { positive, negative },
       model,
+      prompt_mode: mode,
     });
   } catch (err) {
     console.error("[Forensic] refine-prompt failed", err);

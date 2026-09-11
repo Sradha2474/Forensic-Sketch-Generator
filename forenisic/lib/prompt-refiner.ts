@@ -7,10 +7,14 @@ export type DraftPrompt = {
   negative: string;
 };
 
+export type PromptMode = "micro" | "original";
+
 export async function refinePromptWithLLM(input: {
   structured_values: unknown;
   structured?: unknown;
   draft: DraftPrompt;
+  /** Experiment 1B: micro stays ≤~70 tokens; original = full witness style */
+  prompt_mode?: PromptMode;
 }): Promise<{
   ok: boolean;
   prompt?: DraftPrompt;

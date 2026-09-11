@@ -39,13 +39,19 @@ export type FaceProfile = {
   /** Convenience: structured values without confidence/raw */
   structured_values: Record<string, Record<string, string>>;
   prompt?: {
-    /** Mechanical draft from structured tokens */
+    /** Mechanical draft from structured tokens (routed: micro or original) */
     draft_positive: string;
     draft_negative: string;
-    /** LLM-refined witness-style prompt for generation */
+    /** LLM-refined prompt for generation */
     positive: string;
     negative: string;
     refined_by?: string | null;
+    /** Experiment 1B */
+    mode?: "micro" | "original";
+    model?: string;
+    token_count_approx?: number;
+    original_positive?: string;
+    micro_positive?: string | null;
   };
 };
 
