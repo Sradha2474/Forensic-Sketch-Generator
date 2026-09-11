@@ -10,7 +10,7 @@
 import type { FaceProfile } from "./face-profile";
 import type { StructuredAttributes } from "./attribute-normalizer";
 
-const SKIP_NONE = new Set(["none", "unknown"]);
+const SKIP_NONE = new Set(["none", "unknown", "not_available"]);
 
 const GROUP_ORDER = [
   "age",
@@ -35,6 +35,9 @@ const GROUP_ORDER = [
 ] as const;
 
 function phrase(group: string, field: string, value: string): string | null {
+  if (value === "not_available" || value === "unknown") {
+    return null;
+  }
   if (SKIP_NONE.has(value)) {
     // Keep explicit "no beard" style only for facial hair
     if (group === "facial_hair") return `${field.replace(/_/g, " ")}: none`;

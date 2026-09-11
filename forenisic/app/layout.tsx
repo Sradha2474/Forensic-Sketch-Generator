@@ -17,7 +17,11 @@ export const metadata: Metadata = {
   description: "AI-assisted forensic interview and composite sketch UI",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html
       lang="en"

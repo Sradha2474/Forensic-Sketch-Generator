@@ -269,28 +269,31 @@ export default function ForensicIntake() {
           { role: "status", text: "Draft prompt → LLM refine…" },
           {
             role: "status",
-            text: "Generating draft vs LLM-refined sketches (SD worker)…",
+            text: "Generating draft vs LLM faces (SD 1.5, same seed)…",
           },
           {
             role: "ai",
             text: refine.ok
-              ? `Prompts ready (${prompt.refined_by}). Generating two comparison sketches…`
-              : `LLM refine failed (${refine.error ?? "unknown"}) — comparing draft vs fallback. Generating sketches…`,
+              ? `Prompts ready (${prompt.refined_by}). Generating two faces with seed 42 (prompt is the only variable)…`
+              : `LLM refine failed (${refine.error ?? "unknown"}) — comparing draft vs fallback faces…`,
           },
         ]);
         scrollToBottom();
 
+        // Controlled A/B: same seed + same negative; only positive prompt differs.
+        const sharedNegative =
+          prompt.draft_negative ?? prompt.negative;
         const compare = await generateCompare({
           draft: {
             positive: prompt.draft_positive ?? prompt.positive,
-            negative: prompt.draft_negative ?? prompt.negative,
+            negative: sharedNegative,
           },
           final: {
             positive: prompt.positive,
-            negative: prompt.negative,
+            negative: sharedNegative,
           },
           draft_seed: 42,
-          final_seed: 43,
+          final_seed: 42,
         });
 
         setGeneratingImages(false);
@@ -303,12 +306,13 @@ export default function ForensicIntake() {
           console.info("[5 COMPARE IMAGES]", {
             draft_seed: compare.draft_image.seed,
             final_seed: compare.final_image.seed,
+            shared_seed: 42,
           });
           setMessages((prev) => [
             ...prev.filter((m) => m.role !== "status"),
             {
               role: "ai",
-              text: "Sketches ready — draft (mechanical) vs LLM-refined side by side below.",
+              text: "Faces ready — Draft Prompt vs LLM Prompt (same seed) side by side below.",
             },
           ]);
         } else {
@@ -440,12 +444,12 @@ export default function ForensicIntake() {
         {(generatingImages || compareImages || generateError) && (
           <div className="mb-3 space-y-3 rounded-xl border border-primary/40 bg-card/90 p-4 backdrop-blur-md">
             <div className="text-xs uppercase tracking-[0.2em] text-primary">
-              Sketch compare · draft vs LLM-refined
+              Prompt compare · generated faces · seed 42
             </div>
             {generatingImages && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="size-4 animate-spin" />
-                Running Stable Diffusion worker (two jobs)…
+                Running Stable Diffusion worker (two jobs, same seed)…
               </div>
             )}
             {generateError && (
@@ -455,23 +459,25 @@ export default function ForensicIntake() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <figure className="space-y-2">
                   <figcaption className="text-xs font-semibold text-muted-foreground">
-                    Draft (mechanical) · seed {compareImages.draft.seed}
+                    Draft Prompt → Generated Face · seed{" "}
+                    {compareImages.draft.seed}
                   </figcaption>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imageSrc(compareImages.draft)}
-                    alt="Draft forensic sketch from mechanical prompt"
+                    alt="Generated face from draft prompt"
                     className="w-full rounded-lg border border-border bg-background object-contain"
                   />
                 </figure>
                 <figure className="space-y-2">
                   <figcaption className="text-xs font-semibold text-muted-foreground">
-                    LLM-refined · seed {compareImages.final.seed}
+                    LLM Prompt → Generated Face · seed{" "}
+                    {compareImages.final.seed}
                   </figcaption>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imageSrc(compareImages.final)}
-                    alt="LLM-refined forensic sketch"
+                    alt="Generated face from LLM prompt"
                     className="w-full rounded-lg border border-border bg-background object-contain"
                   />
                 </figure>

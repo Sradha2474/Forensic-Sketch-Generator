@@ -472,6 +472,20 @@ export function normalizeAnswer(
   const trimmed = raw.trim();
   const rawOut = trimmed;
 
+  // Experiment / GT sentinel — do not invent taxonomy tokens
+  const lowerSentinel = trimmed.toLowerCase();
+  if (
+    lowerSentinel === "not_available" ||
+    lowerSentinel === "unknown" ||
+    lowerSentinel === "n/a"
+  ) {
+    return {
+      value: "not_available",
+      confidence: 0,
+      raw: rawOut,
+    };
+  }
+
   // 1) Exact option map (MCQ click)
   const optionCanon = OPTION_MAP[key]?.[trimmed];
   if (optionCanon) {

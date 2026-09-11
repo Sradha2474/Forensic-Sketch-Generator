@@ -65,17 +65,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const draftSeed = body.draft_seed ?? 42;
-    const finalSeed = body.final_seed ?? 43;
+    // Same seed for both → only intentional variable is the prompt (controlled A/B).
+    const compareSeed = body.draft_seed ?? body.final_seed ?? 42;
 
     console.log("\n" + "─".repeat(72));
     console.log("[Forensic] generate-compare →", BACKEND);
-    console.log("  draft seed", draftSeed, "| final seed", finalSeed);
+    console.log("  shared seed", compareSeed, "(draft + LLM; prompt is the only variable)");
     console.log("─".repeat(72));
 
     const [draftRes, finalRes] = await Promise.all([
-      callGenerate("draft", draft, draftSeed),
-      callGenerate("final", final, finalSeed),
+      callGenerate("draft", draft, compareSeed),
+      callGenerate("final", final, compareSeed),
     ]);
 
     console.log("[Forensic] generate-compare OK — both images received");
