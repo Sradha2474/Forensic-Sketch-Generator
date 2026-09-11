@@ -22,9 +22,7 @@ model_cache/
 *.safetensors
 *.bin
 
-# Generated runtime outputs
-outputs/*
-!outputs/.gitkeep
+
 
 # OS / IDE
 .DS_Store
