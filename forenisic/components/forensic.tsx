@@ -274,8 +274,8 @@ export default function ForensicIntake() {
           {
             role: "ai",
             text: refine.ok
-              ? `Prompts ready (${prompt.refined_by}). Generating two faces with seed 42 (prompt is the only variable)…`
-              : `LLM refine failed (${refine.error ?? "unknown"}) — comparing draft vs fallback faces…`,
+              ? `Prompts ready (${prompt.refined_by}). Generating two faces with seed 42 (prompt is the only variable). On CPU this often takes 10–20+ minutes per face — leave this tab open and watch the uvicorn terminal…`
+              : `LLM refine failed (${refine.error ?? "unknown"}) — comparing draft vs fallback faces (CPU generation can take a long time)…`,
           },
         ]);
         scrollToBottom();
@@ -374,12 +374,12 @@ export default function ForensicIntake() {
           {!started && (
             <p className="mt-3 text-base text-muted-foreground">
               Tell the assistant you want to generate a suspect image. It will run a
-              full facial taxonomy interview (artist-style), then prepare the composite.
+              compact 40-question facial interview, then prepare the composite.
             </p>
           )}
           {started && !finished && (
             <p className="mt-3 text-sm text-muted-foreground">
-              Facial taxonomy interview · {step + 1} / {INTERVIEW_QUESTION_COUNT}
+              Compact facial interview · {step + 1} / {INTERVIEW_QUESTION_COUNT}
             </p>
           )}
         </div>
