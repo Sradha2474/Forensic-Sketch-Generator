@@ -4,6 +4,11 @@ Convert a structured WitnessProfile into Stable Diffusion prompts.
 Builds:
   - face_prompt      → txt2img (clear face)
   - sketch_prompt    → img2img refine (proper pencil composite)
+
+For interview structured_values (Next.js FaceProfile), see:
+  - ai/micro_prompt_builder.py      → CLIP ≤77 (SD 1.5)
+  - ai/structured_full_prompt.py    → full prompt (FLUX)
+  - ai/model_router.py              → model → micro|original + backend
 """
 
 from __future__ import annotations

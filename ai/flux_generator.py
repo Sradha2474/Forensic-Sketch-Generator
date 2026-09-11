@@ -3,11 +3,17 @@ FLUX.1-schnell generator — separate from SD 1.5 ImageGenerator.
 
 Tuned for RTX 4060 8GB: float16 + model CPU offload + VAE slicing/tiling + 512px.
 Do NOT load at API startup — lazy-load on first model=flux request.
+
+FLUX.1-schnell is a *gated* Hugging Face repo:
+  1) Create account + accept license at
+     https://huggingface.co/black-forest-labs/FLUX.1-schnell
+  2) Set HF_TOKEN (read access) in env or project .env
 """
 
 from __future__ import annotations
 
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -15,9 +21,41 @@ from typing import Optional
 import torch
 from PIL import Image
 
-from utils.config import settings
+from utils.config import ROOT_DIR, settings
 
 logger = logging.getLogger(__name__)
+
+
+def _load_dotenv_files() -> None:
+    """Load HF_TOKEN from common .env locations if not already set."""
+    if os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN"):
+        return
+    for path in (
+        ROOT_DIR / ".env",
+        ROOT_DIR / "forenisic" / ".env",
+    ):
+        if not path.is_file():
+            continue
+        try:
+            for line in path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                k, v = k.strip(), v.strip().strip('"').strip("'")
+                if k in ("HF_TOKEN", "HUGGING_FACE_HUB_TOKEN") and v:
+                    os.environ.setdefault(k, v)
+        except OSError:
+            continue
+
+
+def _hf_token() -> str | None:
+    _load_dotenv_files()
+    return (
+        os.environ.get("HF_TOKEN")
+        or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+        or None
+    )
 
 
 class FluxGenerator:
@@ -44,21 +82,38 @@ class FluxGenerator:
             return
 
         from diffusers import FluxPipeline
+        from huggingface_hub.errors import GatedRepoError, HfHubHTTPError
 
+        token = _hf_token()
         logger.info(
-            "Loading FLUX model %s (device=%s, offload=%s) — first run downloads to cache",
+            "Loading FLUX model %s (device=%s, offload=%s, hf_token=%s)",
             self.model_id,
             self.device,
             settings.flux_cpu_offload,
+            "yes" if token else "NO — gated download will fail",
         )
 
         dtype = torch.float16 if self.device == "cuda" else torch.float32
 
-        self._pipe = FluxPipeline.from_pretrained(
-            self.model_id,
-            torch_dtype=dtype,
-            cache_dir=self.cache_dir,
-        )
+        try:
+            self._pipe = FluxPipeline.from_pretrained(
+                self.model_id,
+                torch_dtype=dtype,
+                cache_dir=self.cache_dir,
+                token=token,
+            )
+        except (GatedRepoError, HfHubHTTPError) as exc:
+            raise RuntimeError(
+                "Cannot download FLUX.1-schnell (gated Hugging Face model).\n"
+                "1) Open https://huggingface.co/black-forest-labs/FLUX.1-schnell "
+                "and click Agree / accept the license while logged in.\n"
+                "2) Create a token at https://huggingface.co/settings/tokens "
+                "(read access).\n"
+                "3) Set HF_TOKEN in the environment or in "
+                f"{ROOT_DIR / '.env'} then restart uvicorn.\n"
+                "   Example: HF_TOKEN=hf_...\n"
+                f"Original error: {exc}"
+            ) from exc
 
         if self.device == "cuda" and settings.flux_cpu_offload:
             # 8GB VRAM: keep most weights on CPU, stream to GPU during denoise

@@ -5,7 +5,7 @@ Next.js interview UI + FastAPI Stable Diffusion worker. Produces **draft vs LLM-
 | Layer | Stack |
 |---|---|
 | UI / interview / LLM refine | Next.js (`forenisic/`) · OpenRouter |
-| Image worker | FastAPI · Diffusers **SD 1.5** · OpenCV polish |
+| Image worker | FastAPI · Diffusers **SD 1.5** + **FLUX.1-schnell** · OpenCV polish |
 | Legacy | Streamlit demo archived under `legacy/` |
 
 ---
@@ -17,19 +17,16 @@ Next.js forensic.tsx
     │  interview (40 Q) → structured profile → model picker
     │  → prompt_router (micro | original) → OpenRouter refine
     ▼
-POST /api/generate-compare
+POST /api/generate-compare  (model=sd15 | flux)
     │
-    ├─► POST :8000/generate  (draft prompt, seed 42, model=sd15)
-    └─► POST :8000/generate  (LLM prompt,  seed 42, model=sd15)
+    ├─► sd15  → SD 1.5 txt2img → img2img → polish
+    └─► flux  → FLUX.1-schnell (full prompt, CLIP+T5) → polish
             │
             ▼
-        SD 1.5 txt2img → img2img → polish
-            │
-            ▼
-        Side-by-side: Draft Prompt → Face | LLM Prompt → Face
+        Side-by-side: Draft Prompt → Face | LLM Prompt → Face  (seed 42)
 ```
 
-Same seed + same negatives so the only intentional variable is the positive prompt. Jobs run sequentially through the bridge (CPU-friendly timeouts).
+Same seed + same negatives so the only intentional variable is the positive prompt. Jobs run sequentially through the bridge; SD and FLUX share a GPU lock.
 
 ---
 
@@ -64,10 +61,26 @@ forenisic/lib/prompts/
 | SD 1.5 | micro | live |
 | SD 1.5 + ControlNet | micro | coming soon |
 | SDXL | micro | coming soon |
-| Flux | original (full) | coming soon |
+| Flux (FLUX.1-schnell) | original (full) | live |
 | SD 3 | original (full) | coming soon |
 
 UI flow: finish 40 questions → **choose model** → router builds draft → LLM refine (mode-aware) → generate.
+
+### FLUX notes (RTX 4060 8GB)
+
+- Checkpoint: `black-forest-labs/FLUX.1-schnell` (Apache-2.0), 4 steps, guidance 0.
+- Uses **full** prompt (CLIP-L + T5-XXL); not truncated to 77 tokens like SD 1.5.
+- Lazy-loaded on first Flux request (does **not** load at uvicorn startup).
+- First run downloads ~20–30GB into `model_cache/` / Hugging Face hub cache (one-time).
+- Defaults: `float16` + `enable_model_cpu_offload()` + VAE slicing/tiling + **512×512**.
+- Close heavy apps before the first Flux run (16GB system RAM is tight with offload).
+- Upgrade deps if needed: `pip install -U "diffusers>=0.30" "transformers>=4.44" accelerate sentencepiece`
+- **Gated model auth (required once):**
+  1. Log in at Hugging Face and open [FLUX.1-schnell](https://huggingface.co/black-forest-labs/FLUX.1-schnell) → **Agree** to the license.
+  2. Create a read token at [settings/tokens](https://huggingface.co/settings/tokens).
+  3. Put `HF_TOKEN=hf_...` in the project root `.env` (see `.env.example`) **or** run `huggingface-cli login`, then **restart uvicorn**.
+
+Python modules: [`ai/flux_generator.py`](ai/flux_generator.py), [`ai/model_router.py`](ai/model_router.py), [`ai/micro_prompt_builder.py`](ai/micro_prompt_builder.py). SD 1.5 remains in [`ai/image_generator.py`](ai/image_generator.py) unchanged.
 
 ---
 

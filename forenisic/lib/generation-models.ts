@@ -49,9 +49,9 @@ export const GENERATION_MODELS: GenerationModel[] = [
   {
     id: "flux",
     label: "Flux",
-    description: "Coming soon · full original prompt",
+    description: "FLUX.1-schnell · full original prompt (CLIP+T5)",
     promptMode: "original",
-    available: false,
+    available: true,
   },
   {
     id: "sd3",
