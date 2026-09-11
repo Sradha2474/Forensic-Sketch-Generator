@@ -48,6 +48,8 @@ class GenerateRequest(BaseModel):
     label: str = "image"
     enable_refine: bool = True
     enable_polish: bool = True
+    # Experiment 1B — logged only; worker is SD 1.5 today
+    model: Optional[str] = "sd15"
 
 
 class GenerateResponse(BaseModel):
@@ -117,6 +119,13 @@ def _generate_sync(req: GenerateRequest) -> GenerateResponse:
         gen.load()
 
     seed = settings.seed if req.seed is None else int(req.seed)
+    logger.info(
+        "generate label=%s model=%s seed=%s prompt_chars=%s",
+        req.label,
+        req.model or "sd15",
+        seed,
+        len(req.prompt),
+    )
     face_prompt = _with_sketch_style(req.prompt)
     sketch_prompt = face_prompt
     face_neg = req.negative_prompt or settings.face_negative_prompt

@@ -42,6 +42,15 @@ class Settings:
     # Paths
     outputs_dir: Path = field(default_factory=lambda: OUTPUTS_DIR)
 
+    # FLUX.1-schnell (RTX 4060 8GB defaults)
+    flux_model_id: str = "black-forest-labs/FLUX.1-schnell"
+    flux_steps: int = 4
+    flux_guidance: float = 0.0
+    flux_max_sequence_length: int = 256
+    flux_width: int = 512
+    flux_height: int = 512
+    flux_cpu_offload: bool = True  # required on 8GB VRAM
+
     # Face pass style (keep short for CLIP 77 tokens)
     face_style_suffix: str = (
         "front facing portrait photo, clear facial features, studio lighting, plain background"

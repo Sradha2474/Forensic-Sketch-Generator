@@ -14,22 +14,22 @@ Next.js interview UI + FastAPI Stable Diffusion worker. Produces **draft vs LLM-
 
 ```text
 Next.js forensic.tsx
-    │  interview → normalize → structured → draft prompt
-    │  → OpenRouter refine → final prompt
+    │  interview (40 Q) → structured profile → model picker
+    │  → prompt_router (micro | original) → OpenRouter refine
     ▼
-POST /api/generate-compare   (Promise.all)
+POST /api/generate-compare
     │
-    ├─► POST :8000/generate  (draft prompt, seed 42)
-    └─► POST :8000/generate  (LLM prompt,  seed 42)
+    ├─► POST :8000/generate  (draft prompt, seed 42, model=sd15)
+    └─► POST :8000/generate  (LLM prompt,  seed 42, model=sd15)
             │
             ▼
-        SD txt2img → img2img → polish (same settings)
+        SD 1.5 txt2img → img2img → polish
             │
             ▼
         Side-by-side: Draft Prompt → Face | LLM Prompt → Face
 ```
 
-Same seed + same negatives so the only intentional variable is the positive prompt. GPU jobs are serialized inside FastAPI (lock); Next still fires both requests concurrently.
+Same seed + same negatives so the only intentional variable is the positive prompt. Jobs run sequentially through the bridge (CPU-friendly timeouts).
 
 ---
 
@@ -45,6 +45,29 @@ python experiments/scripts/run_experiment_1a_celeba.py --image-id 001089.jpg --c
 ```
 
 Artifacts: `experiments/dataset_baseline/celeba_001/`
+
+---
+
+## Experiment 1B (Micro prompt + model router)
+
+Keep the **original** full prompt builder. Add a **micro** (≤77-token) builder and a **router**:
+
+```text
+forenisic/lib/prompts/
+  original_prompt.ts   ← wraps existing prompt-builder.ts (unchanged)
+  micro_prompt.ts      ← NEW ≤77-token prompt
+  prompt_router.ts     ← model → micro | original
+```
+
+| Model | Prompt | Status |
+|-------|--------|--------|
+| SD 1.5 | micro | live |
+| SD 1.5 + ControlNet | micro | coming soon |
+| SDXL | micro | coming soon |
+| Flux | original (full) | coming soon |
+| SD 3 | original (full) | coming soon |
+
+UI flow: finish 40 questions → **choose model** → router builds draft → LLM refine (mode-aware) → generate.
 
 ---
 
