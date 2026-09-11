@@ -1,0 +1,666 @@
+{
+  "experiment": "1A",
+  "case_id": "celeba_001",
+  "image_id": "001089.jpg",
+  "seed": 42,
+  "clip_truncation": {
+    "draft": {
+      "token_count_full": 119,
+      "clip_max_length": 77,
+      "truncated": true,
+      "token_count_effective": 77
+    },
+    "llm": {
+      "token_count_full": 117,
+      "clip_max_length": 77,
+      "truncated": true,
+      "token_count_effective": 77
+    }
+  },
+  "llm_refine": {
+    "ok": true,
+    "model": "openai/gpt-4o-mini",
+    "error": null
+  },
+  "notes": "Faces generated under CLIP's 77-token truncation constraint when token_count_full > clip_max_length. token_count_effective is a baseline measurement against the 77 limit, not Diffusers' exact internal sequence.",
+  "draft": {
+    "image": "generated_draft.png",
+    "correct": 14,
+    "total": 31,
+    "attribute_accuracy": 0.45161290322580644,
+    "rows": [
+      {
+        "attribute": "5_o_Clock_Shadow",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Arched_Eyebrows",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Bald",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Big_Lips",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Big_Nose",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Black_Hair",
+        "ground_truth": true,
+        "predicted": true,
+        "correct": true
+      },
+      {
+        "attribute": "Blond_Hair",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Brown_Hair",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Bushy_Eyebrows",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Chubby",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Double_Chin",
+        "ground_truth": true,
+        "predicted": true,
+        "correct": true
+      },
+      {
+        "attribute": "Eyeglasses",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Goatee",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Gray_Hair",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "High_Cheekbones",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Male",
+        "ground_truth": true,
+        "predicted": true,
+        "correct": true
+      },
+      {
+        "attribute": "Mouth_Slightly_Open",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Mustache",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Narrow_Eyes",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "No_Beard",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Oval_Face",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Pale_Skin",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Pointy_Nose",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Receding_Hairline",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Sideburns",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Smiling",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Straight_Hair",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Wavy_Hair",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Wearing_Earrings",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Wearing_Hat",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Young",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      }
+    ]
+  },
+  "llm": {
+    "image": "generated_llm.png",
+    "correct": 13,
+    "total": 31,
+    "attribute_accuracy": 0.41935483870967744,
+    "rows": [
+      {
+        "attribute": "5_o_Clock_Shadow",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Arched_Eyebrows",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Bald",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Big_Lips",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Big_Nose",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Black_Hair",
+        "ground_truth": true,
+        "predicted": true,
+        "correct": true
+      },
+      {
+        "attribute": "Blond_Hair",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Brown_Hair",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Bushy_Eyebrows",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Chubby",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Double_Chin",
+        "ground_truth": true,
+        "predicted": true,
+        "correct": true
+      },
+      {
+        "attribute": "Eyeglasses",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Goatee",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Gray_Hair",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "High_Cheekbones",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Male",
+        "ground_truth": true,
+        "predicted": true,
+        "correct": true
+      },
+      {
+        "attribute": "Mouth_Slightly_Open",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Mustache",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Narrow_Eyes",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "No_Beard",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Oval_Face",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Pale_Skin",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Pointy_Nose",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Receding_Hairline",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Sideburns",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Smiling",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Straight_Hair",
+        "ground_truth": true,
+        "predicted": false,
+        "correct": false
+      },
+      {
+        "attribute": "Wavy_Hair",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Wearing_Earrings",
+        "ground_truth": false,
+        "predicted": true,
+        "correct": false
+      },
+      {
+        "attribute": "Wearing_Hat",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      },
+      {
+        "attribute": "Young",
+        "ground_truth": false,
+        "predicted": false,
+        "correct": true
+      }
+    ]
+  },
+  "attribute_accuracy_draft": 0.45161290322580644,
+  "attribute_accuracy_llm": 0.41935483870967744,
+  "attribute_table": [
+    {
+      "attribute": "5_o_Clock_Shadow",
+      "ground_truth": false,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Arched_Eyebrows",
+      "ground_truth": false,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Bald",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": true,
+      "draft_correct": true,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Big_Lips",
+      "ground_truth": true,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Big_Nose",
+      "ground_truth": true,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Black_Hair",
+      "ground_truth": true,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Blond_Hair",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Brown_Hair",
+      "ground_truth": false,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Bushy_Eyebrows",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Chubby",
+      "ground_truth": true,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Double_Chin",
+      "ground_truth": true,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Eyeglasses",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Goatee",
+      "ground_truth": false,
+      "generated_draft": true,
+      "generated_llm": false,
+      "draft_correct": false,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Gray_Hair",
+      "ground_truth": false,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "High_Cheekbones",
+      "ground_truth": true,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Male",
+      "ground_truth": true,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Mouth_Slightly_Open",
+      "ground_truth": true,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Mustache",
+      "ground_truth": true,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Narrow_Eyes",
+      "ground_truth": false,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "No_Beard",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": true,
+      "draft_correct": true,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Oval_Face",
+      "ground_truth": false,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Pale_Skin",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Pointy_Nose",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Receding_Hairline",
+      "ground_truth": false,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Sideburns",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Smiling",
+      "ground_truth": true,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Straight_Hair",
+      "ground_truth": true,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Wavy_Hair",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Wearing_Earrings",
+      "ground_truth": false,
+      "generated_draft": true,
+      "generated_llm": true,
+      "draft_correct": false,
+      "llm_correct": false
+    },
+    {
+      "attribute": "Wearing_Hat",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": true,
+      "llm_correct": true
+    },
+    {
+      "attribute": "Young",
+      "ground_truth": false,
+      "generated_draft": false,
+      "generated_llm": false,
+      "draft_correct": true,
+      "llm_correct": true
+    }
+  ]
+}

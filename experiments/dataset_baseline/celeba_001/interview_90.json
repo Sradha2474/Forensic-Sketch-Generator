@@ -1,0 +1,578 @@
+[
+  {
+    "key": "global.character",
+    "group": "01 \u00b7 Overall appearance",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "global.width",
+    "group": "01 \u00b7 Overall appearance",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "global.length",
+    "group": "01 \u00b7 Overall appearance",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "global.symmetry",
+    "group": "01 \u00b7 Overall appearance",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "global.distinctiveness",
+    "group": "01 \u00b7 Overall appearance",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "age.range",
+    "group": "02 \u00b7 Age",
+    "value": "About 50 or older",
+    "source": "celeba"
+  },
+  {
+    "key": "age.wrinkles",
+    "group": "02 \u00b7 Age",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "age.cues",
+    "group": "02 \u00b7 Age",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "face.shape",
+    "group": "03 \u00b7 Face shape",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "face.width",
+    "group": "03 \u00b7 Face shape",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "face.length",
+    "group": "03 \u00b7 Face shape",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "face.thirds",
+    "group": "03 \u00b7 Face shape",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "face.jaw_relationship",
+    "group": "03 \u00b7 Face shape",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "hair.color",
+    "group": "04 \u00b7 Hair",
+    "value": "Black / dark brown",
+    "source": "celeba"
+  },
+  {
+    "key": "hair.length",
+    "group": "04 \u00b7 Hair",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "hair.texture",
+    "group": "04 \u00b7 Hair",
+    "value": "Straight",
+    "source": "celeba"
+  },
+  {
+    "key": "hair.density",
+    "group": "04 \u00b7 Hair",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "hair.style",
+    "group": "04 \u00b7 Hair",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "hair.hairline",
+    "group": "04 \u00b7 Hair",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "forehead.height",
+    "group": "05 \u00b7 Forehead",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "forehead.width",
+    "group": "05 \u00b7 Forehead",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "forehead.shape",
+    "group": "05 \u00b7 Forehead",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "forehead.slope",
+    "group": "05 \u00b7 Forehead",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "brows.thickness",
+    "group": "06 \u00b7 Eyebrows",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "brows.shape",
+    "group": "06 \u00b7 Eyebrows",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "brows.arch",
+    "group": "06 \u00b7 Eyebrows",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "brows.length",
+    "group": "06 \u00b7 Eyebrows",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "brows.spacing",
+    "group": "06 \u00b7 Eyebrows",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "brows.position",
+    "group": "06 \u00b7 Eyebrows",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "eyes.size",
+    "group": "07 \u00b7 Eyes",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "eyes.shape",
+    "group": "07 \u00b7 Eyes",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "eyes.color",
+    "group": "07 \u00b7 Eyes",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "eyes.spacing",
+    "group": "07 \u00b7 Eyes",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "eyes.position",
+    "group": "07 \u00b7 Eyes",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "eyes.orientation",
+    "group": "07 \u00b7 Eyes",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "eyes.depth",
+    "group": "07 \u00b7 Eyes",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "eyes.eyelids",
+    "group": "07 \u00b7 Eyes",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "nose.type",
+    "group": "08 \u00b7 Nose",
+    "value": "Large / prominent",
+    "source": "celeba"
+  },
+  {
+    "key": "nose.length",
+    "group": "08 \u00b7 Nose",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "nose.width",
+    "group": "08 \u00b7 Nose",
+    "value": "Wide",
+    "source": "celeba"
+  },
+  {
+    "key": "nose.bridge",
+    "group": "08 \u00b7 Nose",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "nose.bridge_width",
+    "group": "08 \u00b7 Nose",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "nose.tip",
+    "group": "08 \u00b7 Nose",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "nose.projection",
+    "group": "08 \u00b7 Nose",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "nose.nostrils",
+    "group": "08 \u00b7 Nose",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "cheeks.fullness",
+    "group": "09 \u00b7 Cheeks",
+    "value": "Full / chubby",
+    "source": "celeba"
+  },
+  {
+    "key": "cheeks.bones",
+    "group": "09 \u00b7 Cheeks",
+    "value": "High / sharp",
+    "source": "celeba"
+  },
+  {
+    "key": "cheeks.mid_width",
+    "group": "09 \u00b7 Cheeks",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "cheeks.contour",
+    "group": "09 \u00b7 Cheeks",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "mouth.width",
+    "group": "10 \u00b7 Mouth",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "mouth.position",
+    "group": "10 \u00b7 Mouth",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "mouth.upper_lip",
+    "group": "10 \u00b7 Mouth",
+    "value": "Full",
+    "source": "celeba"
+  },
+  {
+    "key": "mouth.lower_lip",
+    "group": "10 \u00b7 Mouth",
+    "value": "Full",
+    "source": "celeba"
+  },
+  {
+    "key": "mouth.lip_ratio",
+    "group": "10 \u00b7 Mouth",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "mouth.cupids_bow",
+    "group": "10 \u00b7 Mouth",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "mouth.corners",
+    "group": "10 \u00b7 Mouth",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "jaw.width",
+    "group": "11 \u00b7 Jaw",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "jaw.shape",
+    "group": "11 \u00b7 Jaw",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "jaw.definition",
+    "group": "11 \u00b7 Jaw",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "jaw.angle",
+    "group": "11 \u00b7 Jaw",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "chin.size",
+    "group": "12 \u00b7 Chin",
+    "value": "Large",
+    "source": "celeba"
+  },
+  {
+    "key": "chin.width",
+    "group": "12 \u00b7 Chin",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "chin.shape",
+    "group": "12 \u00b7 Chin",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "chin.projection",
+    "group": "12 \u00b7 Chin",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "chin.cleft",
+    "group": "12 \u00b7 Chin",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "ears.size",
+    "group": "13 \u00b7 Ears",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "ears.shape",
+    "group": "13 \u00b7 Ears",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "ears.position",
+    "group": "13 \u00b7 Ears",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "ears.protrusion",
+    "group": "13 \u00b7 Ears",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "ears.lobes",
+    "group": "13 \u00b7 Ears",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "facial_hair.beard",
+    "group": "14 \u00b7 Facial hair",
+    "value": "Stubble / short",
+    "source": "celeba"
+  },
+  {
+    "key": "facial_hair.moustache",
+    "group": "14 \u00b7 Facial hair",
+    "value": "Thick",
+    "source": "celeba"
+  },
+  {
+    "key": "facial_hair.sideburns",
+    "group": "14 \u00b7 Facial hair",
+    "value": "None",
+    "source": "celeba"
+  },
+  {
+    "key": "facial_hair.density",
+    "group": "14 \u00b7 Facial hair",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "facial_hair.color",
+    "group": "14 \u00b7 Facial hair",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "skin.appearance",
+    "group": "15 \u00b7 Skin",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "skin.texture",
+    "group": "15 \u00b7 Skin",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "skin.wrinkles",
+    "group": "15 \u00b7 Skin",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "skin.age_marks",
+    "group": "15 \u00b7 Skin",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "marks.scars",
+    "group": "16 \u00b7 Distinctive marks",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "marks.moles",
+    "group": "16 \u00b7 Distinctive marks",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "marks.birthmarks",
+    "group": "16 \u00b7 Distinctive marks",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "marks.tattoos",
+    "group": "16 \u00b7 Distinctive marks",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "marks.piercings",
+    "group": "16 \u00b7 Distinctive marks",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "marks.dimples",
+    "group": "16 \u00b7 Distinctive marks",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "marks.asymmetry",
+    "group": "16 \u00b7 Distinctive marks",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "accessories.glasses",
+    "group": "17 \u00b7 Accessories",
+    "value": "No",
+    "source": "celeba"
+  },
+  {
+    "key": "accessories.earrings",
+    "group": "17 \u00b7 Accessories",
+    "value": "No",
+    "source": "celeba"
+  },
+  {
+    "key": "accessories.headwear",
+    "group": "17 \u00b7 Accessories",
+    "value": "None",
+    "source": "celeba"
+  },
+  {
+    "key": "context.view_angle",
+    "group": "18 \u00b7 Viewing context",
+    "value": "Straight on",
+    "source": "celeba"
+  },
+  {
+    "key": "context.head_position",
+    "group": "18 \u00b7 Viewing context",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "context.expression",
+    "group": "18 \u00b7 Viewing context",
+    "value": "Smiling / talking",
+    "source": "celeba"
+  },
+  {
+    "key": "context.lighting",
+    "group": "18 \u00b7 Viewing context",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "holistic.distinctiveness",
+    "group": "19 \u00b7 Holistic check",
+    "value": "not_available",
+    "source": "not_available"
+  },
+  {
+    "key": "holistic.age_confirm",
+    "group": "19 \u00b7 Holistic check",
+    "value": "Over ~45",
+    "source": "celeba"
+  },
+  {
+    "key": "holistic.impression",
+    "group": "19 \u00b7 Holistic check",
+    "value": "not_available",
+    "source": "not_available"
+  }
+]

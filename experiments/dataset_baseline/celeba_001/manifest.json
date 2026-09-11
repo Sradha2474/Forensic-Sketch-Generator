@@ -1,0 +1,71 @@
+{
+  "experiment": "1A",
+  "hypothesis": "Baseline: full prompts exceed CLIP 77 and faces are generated under CLIP's 77-token truncation constraint",
+  "notes": "token_count_effective is a baseline measurement against clip_max_length=77, not a claim of the exact Diffusers/CLIP internal sequence. Worker logs truncation warnings when limits are exceeded.",
+  "run_id": "celeba_001_20260910T114047Z",
+  "case_id": "celeba_001",
+  "image_id": "001089.jpg",
+  "seed": 42,
+  "clip_max_length": 77,
+  "interview_summary": {
+    "celeba_mapped": 19,
+    "not_available": 77,
+    "total": 96
+  },
+  "pipeline": {
+    "model": "runwayml/stable-diffusion-v1-5",
+    "same_prompt_for_txt2img_and_img2img": true,
+    "txt2img": {
+      "steps": 28,
+      "guidance_scale": 7.5
+    },
+    "img2img": {
+      "strength": 0.58,
+      "steps": 28,
+      "guidance_scale": 8.0
+    },
+    "opencv": "apply_pencil_sketch"
+  },
+  "prompt_draft": {
+    "file": "draft_prompt.txt",
+    "token_count_full": 119,
+    "clip_max_length": 77,
+    "truncated": true,
+    "token_count_effective": 77,
+    "seed": 42,
+    "image": "generated_draft.png",
+    "generation": {
+      "seed": 42,
+      "label": "draft"
+    }
+  },
+  "prompt_llm": {
+    "file": "llm_prompt.txt",
+    "token_count_full": 117,
+    "clip_max_length": 77,
+    "truncated": true,
+    "token_count_effective": 77,
+    "seed": 42,
+    "image": "generated_llm.png",
+    "generation": {
+      "seed": 42,
+      "label": "llm"
+    },
+    "refined_by": "openai/gpt-4o-mini",
+    "refine_error": null
+  },
+  "artifacts": [
+    "reference.jpg",
+    "celeba_attributes.txt",
+    "ground_truth.json",
+    "interview_90.json",
+    "draft_prompt.txt",
+    "llm_prompt.txt",
+    "generated_draft.png",
+    "generated_llm.png",
+    "evaluation.json",
+    "manifest.json"
+  ],
+  "backend": "http://127.0.0.1:8000",
+  "created_at": "2026-09-10T11:40:47.126815+00:00"
+}

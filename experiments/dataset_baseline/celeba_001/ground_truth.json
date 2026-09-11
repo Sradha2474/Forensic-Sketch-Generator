@@ -1,0 +1,75 @@
+{
+  "source": "CelebA",
+  "image_id": "001089.jpg",
+  "available_attributes": {
+    "5_o_Clock_Shadow": false,
+    "Arched_Eyebrows": false,
+    "Attractive": false,
+    "Bags_Under_Eyes": false,
+    "Bald": false,
+    "Bangs": false,
+    "Big_Lips": true,
+    "Big_Nose": true,
+    "Black_Hair": true,
+    "Blond_Hair": false,
+    "Blurry": false,
+    "Brown_Hair": false,
+    "Bushy_Eyebrows": false,
+    "Chubby": true,
+    "Double_Chin": true,
+    "Eyeglasses": false,
+    "Goatee": false,
+    "Gray_Hair": false,
+    "Heavy_Makeup": false,
+    "High_Cheekbones": true,
+    "Male": true,
+    "Mouth_Slightly_Open": true,
+    "Mustache": true,
+    "Narrow_Eyes": false,
+    "No_Beard": false,
+    "Oval_Face": false,
+    "Pale_Skin": false,
+    "Pointy_Nose": false,
+    "Receding_Hairline": false,
+    "Rosy_Cheeks": false,
+    "Sideburns": false,
+    "Smiling": true,
+    "Straight_Hair": true,
+    "Wavy_Hair": false,
+    "Wearing_Earrings": false,
+    "Wearing_Hat": false,
+    "Wearing_Lipstick": false,
+    "Wearing_Necklace": false,
+    "Wearing_Necktie": false,
+    "Young": false
+  },
+  "landmarks": {
+    "left_eye": [
+      67,
+      111
+    ],
+    "right_eye": [
+      109,
+      112
+    ],
+    "nose": [
+      87,
+      131
+    ],
+    "left_mouth": [
+      68,
+      151
+    ],
+    "right_mouth": [
+      110,
+      150
+    ]
+  },
+  "unavailable_for_interview": [
+    "nose.bridge",
+    "chin.projection",
+    "ears.protrusion",
+    "forehead.slope",
+    "eyes.color"
+  ]
+}

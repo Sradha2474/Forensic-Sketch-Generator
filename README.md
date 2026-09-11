@@ -20,16 +20,31 @@ Next.js forensic.tsx
 POST /api/generate-compare   (Promise.all)
     │
     ├─► POST :8000/generate  (draft prompt, seed 42)
-    └─► POST :8000/generate  (final prompt, seed 43)
+    └─► POST :8000/generate  (LLM prompt,  seed 42)
             │
             ▼
-        SD txt2img → img2img pencil → dodge/burn polish
+        SD txt2img → img2img → polish (same settings)
             │
             ▼
-        Side-by-side images in the UI
+        Side-by-side: Draft Prompt → Face | LLM Prompt → Face
 ```
 
-GPU jobs are serialized inside FastAPI (lock) so one card does not OOM; Next still fires both requests concurrently.
+Same seed + same negatives so the only intentional variable is the positive prompt. GPU jobs are serialized inside FastAPI (lock); Next still fires both requests concurrently.
+
+---
+
+## Experiment 1A (CelebA baseline)
+
+Dataset-driven baseline (**no random UI answers**). Maps a real CelebA face (`Expermiment/001089.jpg`) into the interview schema, runs Draft vs LLM → SD 1.5 (seed 42), and records CLIP truncation + attribute accuracy.
+
+See [`experiments/README.md`](experiments/README.md).
+
+```bash
+# worker must be running on :8000
+python experiments/scripts/run_experiment_1a_celeba.py --image-id 001089.jpg --case-id celeba_001
+```
+
+Artifacts: `experiments/dataset_baseline/celeba_001/`
 
 ---
 
@@ -71,7 +86,7 @@ npm run dev
 
 Or `run-forensic-ui.bat`.
 
-Open [http://localhost:3000](http://localhost:3000) → finish the interview → see **Draft | LLM-refined** sketches.
+Open [http://localhost:3000](http://localhost:3000) → finish the interview → see **Draft Prompt → Generated Face | LLM Prompt → Generated Face** (same seed).
 
 ---
 
