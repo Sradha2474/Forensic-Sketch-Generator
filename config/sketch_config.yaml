@@ -1,0 +1,22 @@
+# Paste your sketch configuration YAML here
+# config/sketch_config.yaml
+# Central config for src/sketch_pipeline.py — change values here instead
+# of editing code. Useful for your paper's hyperparameter/ablation table.
+
+models:
+  base_model: "runwayml/stable-diffusion-v1-5"
+  controlnet_model: "lllyasviel/sd-controlnet-canny"
+
+lora:
+  enabled: true
+  repo_id: "jordanhilado/sd-1-5-sketch-lora"  # SD1.5-compatible pencil-sketch LoRA
+  scale: 0.8  # 0.5-1.0: higher = stronger sketch style influence
+
+prompt:
+  quality_tags: "forensic pencil sketch, monochrome, detailed linework, front-facing police composite portrait, high detail, sharp focus"
+  negative_prompt: "color, colour, cartoon, anime, painting, blurry, extra limbs, deformed, watermark, text, low detail, jpeg artifacts, multiple faces, disfigured"
+
+generation:
+  num_inference_steps: 30
+  guidance_scale: 7.5
+  controlnet_conditioning_scale: 0.75  # 0.4-1.0: how strongly edges constrain the refine pass

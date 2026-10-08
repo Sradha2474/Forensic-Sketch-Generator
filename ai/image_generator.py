@@ -57,6 +57,7 @@ class ImageGenerator:
             cache_dir=self.cache_dir,
             safety_checker=None,
             requires_safety_checker=False,
+            low_cpu_mem_usage=True,
         )
         self._pipe = self._pipe.to(self.device)
 

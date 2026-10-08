@@ -81,15 +81,26 @@ def _with_sketch_style(prompt: str) -> str:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Preload SD 1.5 only — do NOT load FLUX at startup (VRAM / 4060 8GB)
+    # If RAM is tight (CPU float32), fail soft: app still starts; first /generate loads.
     logger.info("Loading Stable Diffusion worker (FLUX lazy-loads on first use)…")
     gen = get_generator()
-    await asyncio.to_thread(gen.load)
-    logger.info(
-        "SD worker ready on device=%s model=%s cuda=%s",
-        gen.device,
-        gen.model_id,
-        __import__("torch").cuda.is_available(),
-    )
+    try:
+        await asyncio.to_thread(gen.load)
+        logger.info(
+            "SD worker ready on device=%s model=%s cuda=%s",
+            gen.device,
+            gen.model_id,
+            __import__("torch").cuda.is_available(),
+        )
+    except MemoryError:
+        logger.exception(
+            "SD preload failed (MemoryError). Close other apps and retry /generate, "
+            "or free RAM. uvicorn will stay up for /health."
+        )
+    except Exception:
+        logger.exception(
+            "SD preload failed. uvicorn will stay up; /generate will retry load."
+        )
     yield
 
 

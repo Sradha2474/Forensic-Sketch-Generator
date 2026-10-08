@@ -99,6 +99,46 @@ def generate_refined(description: str, seed: int = 42, cn_scale: float = 0.75):
     ).images[0]
     return baseline_img, canny_img, refined_img
 
+
+def generate_from_photo(
+    photo: Image.Image,
+    description: str,
+    seed: int = 42,
+    cn_scale: float = 1.0,
+):
+    """Lock structure to a REAL photo (Canny), then sketch-style with LoRA."""
+    try:
+        resample = Image.Resampling.LANCZOS
+    except AttributeError:
+        resample = Image.LANCZOS
+    photo = photo.convert("RGB").resize((512, 512), resample)
+    canny_img = to_canny(photo)
+    generator = torch.Generator(device=DEVICE).manual_seed(seed)
+    prompt = build_prompt(description)
+    try:
+        p, n = get_long_prompt_embeddings(refine_pipe, prompt, NEGATIVE_PROMPT)
+        refined_img = refine_pipe(
+            prompt_embeds=p,
+            negative_prompt_embeds=n,
+            image=canny_img,
+            num_inference_steps=28,
+            guidance_scale=7.5,
+            controlnet_conditioning_scale=float(cn_scale),
+            generator=generator,
+        ).images[0]
+    except Exception as e1:
+        print("Compel path failed, plain prompts:", e1)
+        refined_img = refine_pipe(
+            prompt=prompt,
+            negative_prompt=NEGATIVE_PROMPT,
+            image=canny_img,
+            num_inference_steps=28,
+            guidance_scale=7.5,
+            controlnet_conditioning_scale=float(cn_scale),
+            generator=generator,
+        ).images[0]
+    return photo, canny_img, refined_img
+
 # %% [4] FastAPI app
 app = FastAPI(title="Forensic Sketch ControlNet API")
 app.add_middleware(
@@ -109,6 +149,17 @@ class SketchRequest(BaseModel):
     description: str
     seed: int = 42
     controlnet_scale: float = 0.75
+
+class PhotoSketchRequest(BaseModel):
+    image_base64: str
+    description: str = (
+        "young South Asian woman early 20s, oval soft face, thick wavy dark hair "
+        "past shoulders, dark almond eyes, subtle smile, dark eyebrows, "
+        "tiny nose stud left nostril, white collared shirt, thin chain necklace, "
+        "front view"
+    )
+    seed: int = 42
+    controlnet_scale: float = 1.0
 
 @app.post("/compare")
 def api_compare(req: SketchRequest):
@@ -121,9 +172,38 @@ def api_compare(req: SketchRequest):
         "controlnet_lora_refined": image_to_b64(refined_img),
     }
 
+@app.post("/sketch-from-photo")
+def api_sketch_from_photo(req: PhotoSketchRequest):
+    import traceback
+    try:
+        raw = req.image_base64
+        if "," in raw[:40]:
+            raw = raw.split(",", 1)[1]
+        photo = Image.open(io.BytesIO(base64.b64decode(raw))).convert("RGB")
+        photo_r, canny_img, refined_img = generate_from_photo(
+            photo,
+            description=req.description,
+            seed=req.seed,
+            cn_scale=req.controlnet_scale,
+        )
+        return {
+            "photo_resized": image_to_b64(photo_r),
+            "canny_edges": image_to_b64(canny_img),
+            "controlnet_lora_refined": image_to_b64(refined_img),
+        }
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(tb)
+        return {"ok": False, "error": str(e), "trace": tb}
+
 @app.get("/health")
 def health():
-    return {"status": "ok", "device": DEVICE}
+    return {
+        "status": "ok",
+        "device": DEVICE,
+        "endpoints": ["/compare", "/sketch-from-photo"],
+        "fix": "photo-v2",
+    }
 
 # %% [5] Launch (blocks -- keep this Colab tab open while the app is using it)
 nest_asyncio.apply()
