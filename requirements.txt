@@ -3,12 +3,15 @@
 
 fastapi>=0.110.0
 uvicorn[standard]>=0.27.0
+# Use a CUDA wheel on NVIDIA GPUs, e.g.:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
 torch>=2.0.0
 torchvision>=0.15.0
-# FluxPipeline requires a recent diffusers
+# FluxPipeline + NF4 quantization (Windows: bitsandbytes>=0.43)
 diffusers>=0.30.0
 transformers>=4.44.0
 accelerate>=0.33.0
+bitsandbytes>=0.43.0
 safetensors>=0.4.0
 sentencepiece>=0.2.0
 protobuf>=4.25.0

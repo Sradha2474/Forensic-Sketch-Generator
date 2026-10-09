@@ -49,7 +49,7 @@ export const GENERATION_MODELS: GenerationModel[] = [
   {
     id: "flux",
     label: "Flux",
-    description: "FLUX.1-schnell · full original prompt (CLIP+T5)",
+    description: "FLUX.1-schnell NF4 · full prompt → pencil sketch",
     promptMode: "original",
     available: true,
   },

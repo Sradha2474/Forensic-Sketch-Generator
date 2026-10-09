@@ -68,13 +68,17 @@ UI flow: finish 40 questions → **choose model** → router builds draft → LL
 
 ### FLUX notes (RTX 4060 8GB)
 
-- Checkpoint: `black-forest-labs/FLUX.1-schnell` (Apache-2.0), 4 steps, guidance 0.
+- Checkpoint: `black-forest-labs/FLUX.1-schnell` (Apache-2.0), **4 steps**, **guidance 0**, **512×512**, `max_sequence_length≤256`.
 - Uses **full** prompt (CLIP-L + T5-XXL); not truncated to 77 tokens like SD 1.5.
-- Lazy-loaded on first Flux request (does **not** load at uvicorn startup).
-- First run downloads ~20–30GB into `model_cache/` / Hugging Face hub cache (one-time).
-- Defaults: `float16` + `enable_model_cpu_offload()` + VAE slicing/tiling + **512×512**.
-- Close heavy apps before the first Flux run (16GB system RAM is tight with offload).
-- Upgrade deps if needed: `pip install -U "diffusers>=0.30" "transformers>=4.44" accelerate sentencepiece`
+- **NF4 4-bit** via pre-quantized package `aniketppanchal/flux.1-schnell-nf4-pkg` + `device_map="cuda"` (fits RTX 4060 8GB at 512²).
+- Do **not** use `enable_model_cpu_offload()` with this BnB NF4 package on Windows — it hard-crashes (`0xC0000005`).
+- On-the-fly quant from the full base repo also tends to crash on 16GB Windows RAM while reading ~10GB shards.
+- Lazy-loaded on first Flux request by default; optional `flux_warmup_on_startup` in config.
+- Prefer a Flux-only warm generate (no SD in RAM) for the first image:
+  `python scripts/generate_flux_full_prompt.py`
+- Close heavy apps before the first Flux run (16GB system RAM is tight).
+- Deps: `pip install -U "diffusers>=0.30" "transformers>=4.44" accelerate bitsandbytes sentencepiece`
+- **Limitation (Experiment 1B):** Flux runs NF4 while SD 1.5 runs fp16 — slight quality confound; note in write-ups.
 - **Gated model auth (required once):**
   1. Log in at Hugging Face and open [FLUX.1-schnell](https://huggingface.co/black-forest-labs/FLUX.1-schnell) → **Agree** to the license.
   2. Create a read token at [settings/tokens](https://huggingface.co/settings/tokens).

@@ -2,8 +2,8 @@
 FastAPI image worker for Forensic Sketch Generator.
 
 Routes:
-  model=sd15  → ai.image_generator (SD 1.5 two-pass)  [preloaded at startup]
-  model=flux  → ai.flux_generator (FLUX.1-schnell)    [lazy-load on first use]
+  model=sd15  → ai.image_generator (SD 1.5 two-pass)  [lazy-load; unloads Flux]
+  model=flux  → ai.flux_generator (FLUX.1-schnell NF4) [lazy-load; unloads SD]
 
 Run from repo root:
   uvicorn api.main:app --host 0.0.0.0 --port 8000
@@ -78,29 +78,28 @@ def _with_sketch_style(prompt: str) -> str:
     return p + SKETCH_SUFFIX
 
 
+def _warmup_flux_background() -> None:
+    """Load NF4 FLUX outside an HTTP request (avoids UI ECONNRESET on first use)."""
+    try:
+        logger.info("Background FLUX warm-up starting…")
+        flux = get_flux_generator()
+        flux.load()
+        logger.info("Background FLUX warm-up complete (flux_loaded=True)")
+    except Exception:
+        logger.exception("Background FLUX warm-up failed")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Preload SD 1.5 only — do NOT load FLUX at startup (VRAM / 4060 8GB)
-    # If RAM is tight (CPU float32), fail soft: app still starts; first /generate loads.
-    logger.info("Loading Stable Diffusion worker (FLUX lazy-loads on first use)…")
-    gen = get_generator()
-    try:
-        await asyncio.to_thread(gen.load)
-        logger.info(
-            "SD worker ready on device=%s model=%s cuda=%s",
-            gen.device,
-            gen.model_id,
-            __import__("torch").cuda.is_available(),
-        )
-    except MemoryError:
-        logger.exception(
-            "SD preload failed (MemoryError). Close other apps and retry /generate, "
-            "or free RAM. uvicorn will stay up for /health."
-        )
-    except Exception:
-        logger.exception(
-            "SD preload failed. uvicorn will stay up; /generate will retry load."
-        )
+    # Do NOT preload SD on 8GB VRAM — SD and Flux cannot share the GPU.
+    # Each model lazy-loads on first request; the other is unloaded first.
+    torch = __import__("torch")
+    logger.info(
+        "API ready (lazy SD + Flux). cuda=%s — models load on first /generate",
+        torch.cuda.is_available(),
+    )
+    if settings.flux_warmup_on_startup:
+        asyncio.get_running_loop().run_in_executor(None, _warmup_flux_background)
     yield
 
 
@@ -135,6 +134,10 @@ def health():
         "flux_loaded": flux.is_loaded,
         "sd15_model_id": settings.model_id,
         "flux_model_id": settings.flux_model_id,
+        "flux_nf4_model_id": settings.flux_nf4_model_id,
+        "flux_quant": settings.flux_quant,
+        "flux_quantize_t5": settings.flux_quantize_t5,
+        "flux_offload_mode": settings.flux_offload_mode,
         "cuda_available": torch.cuda.is_available(),
         "device": gen.device if gen.is_loaded else (
             "cuda" if torch.cuda.is_available() else "cpu"
@@ -142,7 +145,24 @@ def health():
     }
 
 
+def _free_gpu_for(backend: str) -> None:
+    """Only one heavy model may occupy the 4060 8GB at a time."""
+    import torch
+
+    sd = get_generator()
+    flux = get_flux_generator()
+    if backend == "flux" and sd.is_loaded:
+        logger.info("Switching to Flux — unloading SD 1.5 first")
+        sd.unload()
+    if backend == "sd15" and flux.is_loaded:
+        logger.info("Switching to SD 1.5 — unloading Flux first")
+        flux.unload()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
 def _generate_sd15(req: GenerateRequest, seed: int) -> GenerateResponse:
+    _free_gpu_for("sd15")
     gen = get_generator()
     if not gen.is_loaded:
         gen.load()
@@ -177,22 +197,22 @@ def _generate_sd15(req: GenerateRequest, seed: int) -> GenerateResponse:
 
 
 def _generate_flux(req: GenerateRequest, seed: int) -> GenerateResponse:
+    # Critical on 8GB: unload SD before Flux device_map=cuda or the worker
+    # hangs / ACCESS_VIOLATION → UI sees read ECONNRESET.
+    _free_gpu_for("flux")
     flux = get_flux_generator()
-    # Lazy load — first call downloads FLUX.1-schnell into model_cache /
-    # Hugging Face hub cache (~20–30GB one-time).
     if not flux.is_loaded:
-        logger.info("Lazy-loading FLUX.1-schnell (first request)…")
+        logger.info("Lazy-loading FLUX.1-schnell NF4 (first request)…")
         flux.load()
 
-    # Full prompt path — do not append the long SD1.5 sketch CLIP suffix
+    # Full prompt → pencil-sketch steered generation (style applied inside generator)
     face = flux.generate_forensic_face(prompt=req.prompt, seed=seed)
 
-    out = face
-    if req.enable_polish:
-        out = apply_pencil_sketch(face)
+    # Always polish Flux to graphite look (OpenCV dodge/burn + edges)
+    out = apply_pencil_sketch(face)
 
     safe_label = "".join(c if c.isalnum() or c in "-_" else "_" for c in req.label)[:40]
-    flux.save(out, prefix=f"api_flux_{safe_label}_{seed}")
+    flux.save(out, prefix=f"api_flux_sketch_{safe_label}_{seed}")
 
     return GenerateResponse(
         label=req.label,

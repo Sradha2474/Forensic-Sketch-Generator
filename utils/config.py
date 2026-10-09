@@ -42,14 +42,23 @@ class Settings:
     # Paths
     outputs_dir: Path = field(default_factory=lambda: OUTPUTS_DIR)
 
-    # FLUX.1-schnell (RTX 4060 8GB defaults)
+    # FLUX.1-schnell (RTX 4060 8GB — NF4 + CPU offload)
     flux_model_id: str = "black-forest-labs/FLUX.1-schnell"
+    # Pre-quantized NF4 package (avoids on-the-fly 10GB shard conversion crash on 16GB RAM)
+    flux_nf4_model_id: str = "aniketppanchal/flux.1-schnell-nf4-pkg"
+    flux_quant: str = "nf4"  # "nf4" | "none"
+    flux_quantize_t5: bool = True  # kept for on-the-fly path; NF4 pkg already quantizes T5
+    # NF4 pkg uses device_map=cuda (offload crashes on Windows). Kept for non-NF4 path.
+    flux_offload_mode: str = "model"  # "model" | "sequential" | "none"
+    flux_max_sequence_length: int = 256  # Schnell limit
     flux_steps: int = 4
     flux_guidance: float = 0.0
-    flux_max_sequence_length: int = 256
     flux_width: int = 512
     flux_height: int = 512
-    flux_cpu_offload: bool = True  # required on 8GB VRAM
+    # Optional: warm-load Flux in a background thread at API startup
+    flux_warmup_on_startup: bool = False
+    # Legacy alias — prefer flux_offload_mode
+    flux_cpu_offload: bool = True
 
     # Face pass style (keep short for CLIP 77 tokens)
     face_style_suffix: str = (

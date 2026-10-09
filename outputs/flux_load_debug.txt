@@ -1,0 +1,8 @@
+cuda=True torch=2.6.0+cu124
+vram free=7.45GiB total=8.59GiB
+C loading with device_map=cuda ...
+C pipeline ready
+vram after load free=0.00GiB
+C generating full prompt 512...
+C SAVED E:\forensic_repo\Forensic-Sketch-Generator\outputs\flux_full_prompt_42.png
+ALL STEPS OK

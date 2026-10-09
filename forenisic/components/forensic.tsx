@@ -235,7 +235,7 @@ export default function ForensicIntake() {
         ...base,
         {
           role: "ai",
-          text: "Interview complete. Choose a generation model below. SD 1.5 uses a micro (≤77-token) prompt; Flux / SD 3 will use the full original prompt when available.",
+          text: "Interview complete. Choose a generation model below. SD 1.5 uses a micro (≤77-token) prompt; Flux is unlocked and uses the full original prompt → pencil sketch.",
         },
       ]);
       scrollToBottom();
@@ -490,7 +490,8 @@ export default function ForensicIntake() {
             </div>
             <p className="text-sm text-muted-foreground">
               CLIP-limited models use a <strong>micro</strong> prompt (≤77 tokens).
-              Flux / SD 3 will use the <strong>original</strong> full prompt when enabled.
+              <strong> Flux is live</strong> and uses the <strong>original</strong> full
+              prompt, then renders a graphite pencil sketch.
             </p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {GENERATION_MODELS.map((m) => (
@@ -536,7 +537,9 @@ export default function ForensicIntake() {
             {generatingImages && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="size-4 animate-spin" />
-                Running Stable Diffusion worker (two jobs, same seed)…
+                {selectedModel === "flux"
+                  ? "Running Flux NF4 worker (full prompt → pencil sketches, two jobs, same seed)… First Flux load can take several minutes."
+                  : "Running image worker (two jobs, same seed)…"}
               </div>
             )}
             {generateError && (

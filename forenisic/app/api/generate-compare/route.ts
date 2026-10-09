@@ -26,7 +26,7 @@ type GenerateBody = {
   final?: PromptPair;
   draft_seed?: number;
   final_seed?: number;
-  /** Experiment 1B model id (sd15 today) */
+  /** Experiment 1B model id: sd15 | flux */
   model?: string;
 };
 
@@ -95,6 +95,8 @@ async function callGenerate(
     seed,
     label,
     model,
+    enable_polish: true,
+    enable_refine: true,
   });
 
   if (status < 200 || status >= 300) {

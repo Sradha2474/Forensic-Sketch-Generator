@@ -41,6 +41,18 @@ class ImageGenerator:
     def is_loaded(self) -> bool:
         return self._pipe is not None
 
+    def unload(self) -> None:
+        """Free SD pipelines from VRAM/RAM so Flux can use the 8GB GPU."""
+        if self._pipe is None and self._img2img is None:
+            return
+        logger.info("Unloading Stable Diffusion to free VRAM…")
+        self._pipe = None
+        self._img2img = None
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
+        logger.info("Stable Diffusion unloaded")
+
     def load(self) -> None:
         """Load txt2img and reuse weights for img2img."""
         if self._pipe is not None:
